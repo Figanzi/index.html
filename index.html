@@ -818,9 +818,9 @@ async function iniciar(){
   try {
     if(txt) txt.textContent = 'Conectando...';
     
-    // Timeout de 8 segundos
+    // Intentar cargar con timeout de 6 segundos
     const timeout = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Tiempo de espera agotado')), 8000)
+      setTimeout(() => reject(new Error('timeout')), 6000)
     );
     
     await Promise.race([cargarDatos(), timeout]);
@@ -830,22 +830,21 @@ async function iniciar(){
     renderHoy();
     actualizarDatalist();
   } catch(e) {
-    console.error('Error iniciar:', e);
-    if(txt) txt.textContent = 'Error de conexión. Revisa internet.';
+    console.error('Error al conectar:', e);
+    if(txt) txt.innerHTML = `
+      Error de conexión<br>
+      <span style="font-size:10px;color:#999;display:block;margin-top:8px">Revisa tu internet o las reglas de Supabase</span>
+      <button onclick="reintentar()" style="margin-top:12px;padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">🔄 Reintentar</button>
+    `;
     setSyncStatus('error');
-    // Ocultar loading después de 3 segundos aunque haya error
-    setTimeout(()=>{ 
-      if(overlay) overlay.classList.add('hidden');
-      renderHoy();
-    }, 3000);
   }
+}
 
-const ahora = new Date();
-q('h-fecha').textContent = ahora.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
-q('h-mes').textContent = ahora.toLocaleDateString('es-CL',{month:'long',year:'numeric'}).replace(/^\w/,c=>c.toUpperCase());
-q('f-fcita').value = hoy();
-q('f-fventa').value = hoy();
-iniciar();
+window.reintentar = function(){
+  const txt = document.querySelector('.loading-txt');
+  if(txt) txt.innerHTML = 'Conectando...<div class="spinner" style="margin-top:12px"></div>';
+  setTimeout(()=>{ iniciar(); }, 500);
+}
 </script>
 </body>
 </html>
