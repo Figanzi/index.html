@@ -259,17 +259,16 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
         <div class="row2"><div class="form-section"><label>Tipo de piedra</label><select id="f-piedra"><option value="">Sin piedra</option><option>Granito</option><option>Mármol</option><option>Silestone</option><option>Posformado</option><option>Por definir</option></select></div><div class="form-section"><label>Color melamina</label><input type="text" id="f-melamina" placeholder="Ej: Grafito, Blanco..."></div></div>
      <div class="form-section"><label>Extras incluidos</label>
   <div class="check-grid" id="extras-grid">
-    <div class="chk extra-btn" data-extra="enchufe" onclick="toggleExtra(this)"><span class="extra-box"></span> Enchufe</div>
-    <div class="chk extra-btn" data-extra="lavaplatos" onclick="toggleExtra(this)"><span class="extra-box"></span> Lavaplatos</div>
-    <div class="chk extra-btn" data-extra="gas" onclick="toggleExtra(this)"><span class="extra-box"></span> Gas</div>
-    <div class="chk extra-btn" data-extra="horno" onclick="toggleExtra(this)"><span class="extra-box"></span> Horno micr.</div>
-    <div class="chk extra-btn" data-extra="agua" onclick="toggleExtra(this)"><span class="extra-box"></span> Agua</div>
-    <div class="chk extra-btn" data-extra="campana" onclick="toggleExtra(this)"><span class="extra-box"></span> Campana</div>
-    <div class="chk extra-btn" data-extra="piedra" onclick="toggleExtra(this)"><span class="extra-box"></span> Piedra</div>
-    <div class="chk extra-btn" data-extra="copero" onclick="toggleExtra(this)"><span class="extra-box"></span> Copero</div>
-    <div class="chk extra-btn" data-extra="post" onclick="toggleExtra(this)"><span class="extra-box"></span> Post</div>
-    <div class="chk extra-btn" data-extra="peninsula" onclick="toggleExtra(this)"><span class="extra-box"></span> Península</div>
-  </div>
+   <div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Enchufe</div>
+<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Lavaplatos</div>
+<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Gas</div>
+<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Horno micr.</div>
+<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Agua</div>
+<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Campana</div>
+<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Piedra</div>
+<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Copero</div>
+<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Post</div>
+<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Península</div>
   <style>
 .extra-btn{display:flex!important;align-items:center!important;gap:8px!important;cursor:pointer!important;padding:10px 12px!important;font-size:14px!important}
 .extra-box{width:22px;height:22px;border-radius:4px;border:2px solid #ccc;flex-shrink:0;position:relative}
