@@ -289,12 +289,18 @@ textarea{resize:vertical;min-height:80px}
 <div id="pdf-preview"></div>
 
 <script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const supabase = createClient(
-  "https://iebklwcjhcdtlwxzjvxl.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllYmtsd2NqaGNkdGx3eHpqdnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MjU3ODQsImV4cCI6MjA5NDIwMTc4NH0.TJEAILjiaMGo2iu8hCVJ0PbkMboIpKSe2X3bMgxrJ_E"
-);
+const SUPABASE_URL = "https://iebklwcjhcdtlwxzjvxl.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllYmtsd2NqaGNkdGx3eHpqdnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MjU3ODQsImV4cCI6MjA5NDIwMTc4NH0.TJEAILjiaMGo2iu8hCVJ0PbkMboIpKSe2X3bMgxrJ_E";
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: false }
+});
+  async function cargarDatos() {
+  const { data, error } = await supabase.from('registros').select('*').order('id', { ascending: true });
+  if (error) throw error;
+  _cache = data.map(r => ({ id: String(r.id), ...(r.datos || {}) }));
+}
 
 let _cache = [];
 function getData() { return _cache; }
