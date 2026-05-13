@@ -63,8 +63,9 @@ html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;colo
   background: var(--surface);
   border-top: 1px solid var(--border);
   display: flex;
-  padding-top: 12px;
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  padding-top: 6px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  height: calc(50px + env(safe-area-inset-bottom, 0px));
   z-index: 100;
 }
 
