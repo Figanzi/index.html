@@ -259,21 +259,24 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
         <div class="row2"><div class="form-section"><label>Tipo de piedra</label><select id="f-piedra"><option value="">Sin piedra</option><option>Granito</option><option>Mármol</option><option>Silestone</option><option>Posformado</option><option>Por definir</option></select></div><div class="form-section"><label>Color melamina</label><input type="text" id="f-melamina" placeholder="Ej: Grafito, Blanco..."></div></div>
      <div class="form-section"><label>Extras incluidos</label>
   <div class="check-grid" id="extras-grid">
-   <div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Enchufe</div>
-<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Lavaplatos</div>
-<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Gas</div>
-<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Horno micr.</div>
-<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Agua</div>
-<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Campana</div>
-<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Piedra</div>
-<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Copero</div>
-<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Post</div>
-<div class="chk" onclick="this.classList.toggle('sel');this.querySelector('.extra-box').classList.toggle('sel')"><span class="extra-box"></span> Península</div>
+   <div class="form-section">
+  <label>Extras incluidos</label>
+  <div class="check-grid" id="extras-grid">
+    <label class="chk"><input type="checkbox" id="x-enchufe"><span>Enchufe</span></label>
+    <label class="chk"><input type="checkbox" id="x-lavaplatos"><span>Lavaplatos</span></label>
+    <label class="chk"><input type="checkbox" id="x-gas"><span>Gas</span></label>
+    <label class="chk"><input type="checkbox" id="x-horno"><span>Horno micr.</span></label>
+    <label class="chk"><input type="checkbox" id="x-agua"><span>Agua</span></label>
+    <label class="chk"><input type="checkbox" id="x-campana"><span>Campana</span></label>
+    <label class="chk"><input type="checkbox" id="x-piedra"><span>Piedra</span></label>
+    <label class="chk"><input type="checkbox" id="x-copero"><span>Copero</span></label>
+    <label class="chk"><input type="checkbox" id="x-post"><span>Post</span></label>
+    <label class="chk"><input type="checkbox" id="x-peninsula"><span>Península</span></label>
+  </div>
   <style>
-.extra-btn{display:flex!important;align-items:center!important;gap:8px!important;cursor:pointer!important;padding:10px 12px!important;font-size:14px!important}
-.extra-box{width:22px;height:22px;border-radius:4px;border:2px solid #ccc;flex-shrink:0;position:relative}
-.extra-btn.sel .extra-box{background:#1a6b4a;border-color:#1a6b4a}
-.extra-btn.sel .extra-box::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-weight:700;font-size:13px}
+.chk{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;font-size:14px;background:var(--surface);-webkit-tap-highlight-color:transparent;transition:all .15s}
+.chk input[type=checkbox]{width:22px;height:22px;accent-color:var(--green);flex-shrink:0;margin:0;padding:0}
+.chk:has(input:checked){background:var(--green-light);border-color:var(--green-mid)}
   </style>
 </div>
         <div class="form-section"><label>Croquis / boceto</label><textarea id="f-croquis" rows="4" placeholder="Ej: Cocina en L, 3m pared norte..."></textarea></div>
