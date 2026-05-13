@@ -188,13 +188,13 @@ textarea{resize:vertical;min-height:80px}
   </div>
 
   <div class="content">
-    <div class="stat-card" style="cursor:pointer" onclick="mostrarDeudores()"><div class="stat-label">Por cobrar</div><div class="stat-num red" id="s-cobrar">$0</div></div>
+    <div class="pane active" id="p-hoy">
       <div id="aviso-hoy" class="aviso" style="display:none"><strong>☀️ Buenos días</strong><p id="aviso-txt"></p></div>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-label">Citas hoy</div><div class="stat-num" id="s-citas">0</div></div>
         <div class="stat-card"><div class="stat-label">Entregas hoy</div><div class="stat-num" id="s-ent">0</div></div>
         <div class="stat-card"><div class="stat-label">Generado mes</div><div class="stat-num green" id="s-mes">$0</div></div>
-        <div class="stat-card"><div class="stat-label">Por cobrar</div><div class="stat-num red" id="s-cobrar">$0</div></div>
+        <div class="stat-card" style="cursor:pointer" onclick="mostrarDeudores()"><div class="stat-label">Por cobrar</div><div class="stat-num red" id="s-cobrar">$0</div></div>
       </div>
       <div class="sec-title">Agenda de hoy</div>
       <div id="lista-hoy"></div>
@@ -278,7 +278,8 @@ textarea{resize:vertical;min-height:80px}
 </nav>
 
 <div class="modal-overlay" id="modal-editar"><div class="modal"><div class="modal-handle"></div><div class="modal-title" id="modal-title"></div><div id="modal-body"></div></div></div>
-  <div class="modal-overlay" id="modal-deudores">
+
+<div class="modal-overlay" id="modal-deudores">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">💰 Clientes con saldo pendiente</div>
@@ -286,6 +287,7 @@ textarea{resize:vertical;min-height:80px}
     <button class="btn-outline" style="width:100%;margin-top:12px" onclick="document.getElementById('modal-deudores').classList.remove('open')">Cerrar</button>
   </div>
 </div>
+
 <div id="pdf-preview"></div>
 
 <script type="module">
@@ -293,14 +295,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = "https://iebklwcjhcdtlwxzjvxl.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllYmtsd2NqaGNkdGx3eHpqdnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MjU3ODQsImV4cCI6MjA5NDIwMTc4NH0.TJEAILjiaMGo2iu8hCVJ0PbkMboIpKSe2X3bMgxrJ_E";
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: { persistSession: false }
-});
-  async function cargarDatos() {
-  const { data, error } = await supabase.from('registros').select('*').order('id', { ascending: true });
-  if (error) throw error;
-  _cache = data.map(r => ({ id: String(r.id), ...(r.datos || {}) }));
-}
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
 
 let _cache = [];
 function getData() { return _cache; }
@@ -582,6 +577,34 @@ function renderPerfil(k){
 }
 window.volverClientes = function(){ perfilActivo=null; renderClientes(); }
 
+// ============ DEUDORES ============
+window.mostrarDeudores = function(){
+  const data = getData();
+  const deudores = {};
+  data.forEach(x => {
+    if(x.tipo !== 'pedido' || x.estado === 'cancelado') return;
+    const s = saldo(x);
+    if(s <= 0) return;
+    const k = normNom(x.nombre);
+    if(!deudores[k]) deudores[k] = {nombre: x.nombre, tel: x.tel||'', total: 0, pedidos:[]};
+    deudores[k].total += s;
+    deudores[k].pedidos.push(x);
+  });
+  const lista = Object.values(deudores).sort((a,b) => b.total - a.total);
+  if(lista.length === 0){
+    q('deudores-body').innerHTML = '<div class="empty"><div class="empty-icon">🎉</div><p>¡Todos al día!</p></div>';
+  } else {
+    const totalGeneral = lista.reduce((a,x) => a + x.total, 0);
+    let html = `<div class="card" style="margin-bottom:12px;background:var(--red-light);border-color:var(--red-mid)"><div style="display:flex;justify-content:space-between"><span style="font-weight:700;color:var(--red)">TOTAL POR COBRAR</span><span style="font-weight:700;color:var(--red);font-size:18px">${fmtM(totalGeneral)}</span></div></div>`;
+    lista.forEach(d => {
+      html += `<div class="card" style="margin-bottom:8px;cursor:pointer" onclick="document.getElementById('modal-deudores').classList.remove('open');abrirPerfil('${normNom(d.nombre)}')"><div style="display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:50%;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">${iniciales(d.nombre)}</div><div style="flex:1"><div style="font-size:14px;font-weight:600">${d.nombre}</div><div style="font-size:11px;color:var(--text2)">${d.pedidos.length} pedido${d.pedidos.length!==1?'s':''} pendiente${d.pedidos.length!==1?'s':''}</div></div><div style="text-align:right"><div style="font-size:15px;font-weight:700;color:var(--red)">${fmtM(d.total)}</div></div></div></div>`;
+    });
+    q('deudores-body').innerHTML = html;
+  }
+  q('modal-deudores').classList.add('open');
+}
+q('modal-deudores').addEventListener('click', function(e){ if(e.target === this) this.classList.remove('open'); });
+
 // ============ PDF ============
 window.descargarPDF = function(k){
   const c = getClientes().find(x=>normNom(x.nombre)===k);
@@ -763,7 +786,6 @@ window.guardar = async function(){
   
   try {
     await saveData(null, base);
-    // Limpiar formulario
     document.querySelectorAll('#p-nuevo input:not([type=checkbox])').forEach(el=>{
       if(el.type==='time') el.value='10:00'; else el.value='';
     });
@@ -773,84 +795,32 @@ window.guardar = async function(){
     go('hoy');
   } catch(e) { alert('Error al guardar: ' + e.message); }
 }
-window.mostrarDeudores = function(){
-  const data = getData();
-  const deudores = {};
-  
-  data.forEach(x => {
-    if(x.tipo !== 'pedido' || x.estado === 'cancelado') return;
-    const s = saldo(x);
-    if(s <= 0) return;
-    const k = normNom(x.nombre);
-    if(!deudores[k]) deudores[k] = {nombre: x.nombre, tel: x.tel||'', total: 0, pedidos:[]};
-    deudores[k].total += s;
-    deudores[k].pedidos.push(x);
-  });
-  
-  const lista = Object.values(deudores).sort((a,b) => b.total - a.total);
-  
-  if(lista.length === 0){
-    q('deudores-body').innerHTML = '<div class="empty"><div class="empty-icon">🎉</div><p>¡Todos al día!</p></div>';
-  } else {
-    const totalGeneral = lista.reduce((a,x) => a + x.total, 0);
-    let html = `<div class="card" style="margin-bottom:12px;background:var(--red-light);border-color:var(--red-mid)">
-      <div style="display:flex;justify-content:space-between"><span style="font-weight:700;color:var(--red)">TOTAL POR COBRAR</span><span style="font-weight:700;color:var(--red);font-size:18px">${fmtM(totalGeneral)}</span></div>
-    </div>`;
-    
-    lista.forEach(d => {
-      html += `<div class="card" style="margin-bottom:8px;cursor:pointer" onclick="document.getElementById('modal-deudores').classList.remove('open');abrirPerfil('${normNom(d.nombre)}')">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-          <div style="width:36px;height:36px;border-radius:50%;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">${iniciales(d.nombre)}</div>
-          <div style="flex:1"><div style="font-size:14px;font-weight:600">${d.nombre}</div><div style="font-size:11px;color:var(--text2)">${d.pedidos.length} pedido${d.pedidos.length!==1?'s':''} pendiente${d.pedidos.length!==1?'s':''}</div></div>
-          <div style="text-align:right"><div style="font-size:15px;font-weight:700;color:var(--red)">${fmtM(d.total)}</div></div>
-        </div>
-      </div>`;
-    });
-    q('deudores-body').innerHTML = html;
-  }
-  
-  q('modal-deudores').classList.add('open');
-}
 
-// Cerrar modal de deudores al tocar fuera
-q('modal-deudores').addEventListener('click', function(e){
-  if(e.target === this) this.classList.remove('open');
-});
 // ============ INIT ============
 async function iniciar(){
   const txt = document.querySelector('.loading-txt');
   const overlay = q('loading-overlay');
-  
   try {
     if(txt) txt.textContent = 'Conectando...';
-    
-    // Intentar cargar con timeout de 6 segundos
-    const timeout = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('timeout')), 6000)
-    );
-    
-    await Promise.race([cargarDatos(), timeout]);
-    
+    await cargarDatos();
     if(overlay) overlay.classList.add('hidden');
     setSyncStatus('ok');
     renderHoy();
     actualizarDatalist();
   } catch(e) {
-    console.error('Error al conectar:', e);
-    if(txt) txt.innerHTML = `
-      Error de conexión<br>
-      <span style="font-size:10px;color:#999;display:block;margin-top:8px">Revisa tu internet o las reglas de Supabase</span>
-      <button onclick="reintentar()" style="margin-top:12px;padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">🔄 Reintentar</button>
-    `;
+    console.error(e);
+    if(txt) txt.innerHTML = 'Error de conexión<br><span style="font-size:10px;color:#999">Revisa tu internet</span><br><button onclick="iniciar()" style="margin-top:10px;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:DM Sans,sans-serif">🔄 Reintentar</button>';
     setSyncStatus('error');
+    setTimeout(()=>{ if(overlay) overlay.classList.add('hidden'); }, 5000);
   }
 }
 
-window.reintentar = function(){
-  const txt = document.querySelector('.loading-txt');
-  if(txt) txt.innerHTML = 'Conectando...<div class="spinner" style="margin-top:12px"></div>';
-  setTimeout(()=>{ iniciar(); }, 500);
-}
+const ahora = new Date();
+q('h-fecha').textContent = ahora.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
+q('h-mes').textContent = ahora.toLocaleDateString('es-CL',{month:'long',year:'numeric'}).replace(/^\w/,c=>c.toUpperCase());
+q('f-fcita').value = hoy();
+q('f-fventa').value = hoy();
+iniciar();
 </script>
 </body>
 </html>
