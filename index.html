@@ -1081,6 +1081,47 @@ document.getElementById('h-mes').textContent=ahora.toLocaleDateString('es-CL',{m
 document.getElementById('f-fcita').value=hoy();
 document.getElementById('f-fventa').value=hoy();
 
+  function verCliente(nombre, celular, total, abonado, saldo) {
+    const contenido = 
+      <!-- Ventana de Detalles del Cliente -->
+<div id="detalle-cliente" class="pane" style="display: none; position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; height: 100vh; background: var(--bg); z-index: 150; padding: 20px; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-family: 'DM Serif Display', serif; font-size: 24px;">Detalles del Cliente</h2>
+        <button onclick="cerrarDetalle()" class="btn-outline" style="width: auto;">Volver</button>
+    </div>
+    <div id="detalle-contenido" class="card"></div>
+</div>
+
+        <div class="cliente-head" style="margin-bottom: 16px;">
+            <div class="cliente-avatar">${nombre.charAt(0)}</div>
+            <div class="cliente-info">
+                <h3>${nombre}</h3>
+                <p style="font-size: 14px; color: var(--text2);">📱 ${celular}</p>
+            </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
+                <span style="color: var(--text2);">Total Contratado:</span>
+                <span style="font-weight: 600; color: var(--blue);">$${total}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
+                <span style="color: var(--text2);">Abonado:</span>
+                <span style="font-weight: 600; color: var(--green);">$${abonado}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                <span style="color: var(--text2);">Saldo Pendiente:</span>
+                <span style="font-weight: 600; color: var(--red);">$${saldo}</span>
+            </div>
+        </div>
+    `;
+    document.getElementById('detalle-contenido').innerHTML = contenido;
+    document.getElementById('detalle-cliente').style.display = 'block';
+}
+
+function cerrarDetalle() {
+    document.getElementById('detalle-cliente').style.display = 'none';
+}
+
 renderHoy();
 </script>
 </body>
