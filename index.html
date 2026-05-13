@@ -137,20 +137,10 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .cal-events{margin-top:4px}
 
 .perfil-back{display:flex;align-items:center;gap:8px;margin-bottom:14px;cursor:pointer;color:var(--text2);font-size:13px;font-weight:500}
-.perfil-avatar{width:56px;height:56px;border-radius:50%;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;flex-shrink:0}
-.perfil-head{display:flex;align-items:center;gap:14px;margin-bottom:16px}
-.perfil-nombre{font-family:'DM Serif Display',serif;font-size:22px}
-.perfil-sub{font-size:13px;color:var(--text2);margin-top:2px}
 .info-row{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
 .info-row:last-child{border-bottom:none}
 .info-label{color:var(--text2);font-weight:500;flex-shrink:0;margin-right:12px}
 .info-val{color:var(--text);text-align:right;word-break:break-word}
-.historial-item{padding:10px 0;border-bottom:1px solid var(--border)}
-.historial-item:last-child{border-bottom:none}
-.h-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-.h-tipo{font-size:12px;font-weight:600;color:var(--text)}
-.h-fecha{font-size:11px;color:var(--text3)}
-.h-det{font-size:12px;color:var(--text2);line-height:1.5}
 
 .aviso{background:var(--green-light);border:1px solid var(--green-mid);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px}
 .aviso strong{font-size:13px;font-weight:600;color:var(--green);display:block;margin-bottom:3px}
@@ -268,11 +258,16 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
         <div style="height:1px;background:var(--border);margin:4px 0 14px"></div>
         <div class="row2"><div class="form-section"><label>Tipo de piedra</label><select id="f-piedra"><option value="">Sin piedra</option><option>Granito</option><option>Mármol</option><option>Silestone</option><option>Posformado</option><option>Por definir</option></select></div><div class="form-section"><label>Color melamina</label><input type="text" id="f-melamina" placeholder="Ej: Grafito, Blanco..."></div></div>
         <div class="form-section"><label>Extras incluidos</label><div class="check-grid">
-          <label class="chk"><input type="checkbox" id="x-enchufe"> Enchufe</label><label class="chk"><input type="checkbox" id="x-lavaplatos"> Lavaplatos</label>
-          <label class="chk"><input type="checkbox" id="x-gas"> Gas</label><label class="chk"><input type="checkbox" id="x-horno"> Horno micr.</label>
-          <label class="chk"><input type="checkbox" id="x-agua"> Agua</label><label class="chk"><input type="checkbox" id="x-campana"> Campana</label>
-          <label class="chk"><input type="checkbox" id="x-piedra"> Piedra</label><label class="chk"><input type="checkbox" id="x-copero"> Copero</label>
-          <label class="chk"><input type="checkbox" id="x-post"> Post</label><label class="chk"><input type="checkbox" id="x-peninsula"> Península</label>
+          <label class="chk"><input type="checkbox" id="x-enchufe"> Enchufe</label>
+          <label class="chk"><input type="checkbox" id="x-lavaplatos"> Lavaplatos</label>
+          <label class="chk"><input type="checkbox" id="x-gas"> Gas</label>
+          <label class="chk"><input type="checkbox" id="x-horno"> Horno micr.</label>
+          <label class="chk"><input type="checkbox" id="x-agua"> Agua</label>
+          <label class="chk"><input type="checkbox" id="x-campana"> Campana</label>
+          <label class="chk"><input type="checkbox" id="x-piedra"> Piedra</label>
+          <label class="chk"><input type="checkbox" id="x-copero"> Copero</label>
+          <label class="chk"><input type="checkbox" id="x-post"> Post</label>
+          <label class="chk"><input type="checkbox" id="x-peninsula"> Península</label>
         </div></div>
         <div class="form-section"><label>Croquis / boceto</label><textarea id="f-croquis" rows="4" placeholder="Ej: Cocina en L, 3m pared norte..."></textarea></div>
         <div class="row2"><div class="form-section"><label>Fecha de venta</label><input type="date" id="f-fventa"></div><div class="form-section"><label>Propuesta entrega</label><input type="date" id="f-fentrega"></div></div>
@@ -460,7 +455,16 @@ function miniCard(x){
 }
 
 window.cambiarEstado = async function(id, est){
-  try { await saveData(id, {estado: est}); } catch(e) { alert('Error al guardar.'); }
+  try {
+    setSyncStatus('syncing');
+    await saveData(id, {estado: est});
+    await cargarDatos();
+    setSyncStatus('ok');
+    renderHoy();
+  } catch(e) {
+    alert('Error al guardar.');
+    setSyncStatus('error');
+  }
 }
 
 // ============ CALENDARIO ============
@@ -491,10 +495,17 @@ function renderCal(){
   dias.forEach(({fecha,otroMes})=>{
     const fs=fecha.toISOString().split('T')[0];
     const evs=eventosDelMes.filter(x=>(x.tipo==='cita'?x.fecha:x.fentrega)===fs);
+    const tieneCitas=eventosDelMes.filter(x=>x.tipo==='cita'&&x.fecha===fs).length>0;
+    const tienePedidos=eventosDelMes.filter(x=>x.tipo==='pedido'&&x.fentrega===fs).length>0;
     const isHoy=fs===hoyS;
     const isSel=fs===calSelDia;
     const cls=['cal-day',otroMes?'other-month':'',isHoy?'today':'',isSel&&!isHoy?'selected':'',evs.length?'has-event':''].filter(Boolean).join(' ');
-    html+=`<div class="${cls}" onclick="selDiaCal('${fs}')">${fecha.getDate()}${evs.length&&!isHoy?`<div class="dot"></div>`:''}${evs.length&&isHoy?`<div class="dot" style="background:#fff"></div>`:''}</div>`;
+    html+=`<div class="${cls}" onclick="selDiaCal('${fs}')">
+      ${fecha.getDate()}
+      ${tieneCitas&&!isHoy?`<div class="dot" style="background:var(--red)"></div>`:''}
+      ${tienePedidos&&!tieneCitas&&!isHoy?`<div class="dot" style="background:var(--blue)"></div>`:''}
+      ${(tieneCitas||tienePedidos)&&isHoy?`<div class="dot" style="background:#fff"></div>`:''}
+    </div>`;
   });
   document.getElementById('cal-grid').innerHTML=html;
 
@@ -578,31 +589,119 @@ function renderPerfil(k){
   const c=clientes.find(x=>normNom(x.nombre)===k);
   if(!c){perfilActivo=null;renderClientes();return;}
   const pedidos=c.registros.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado');
+  const citas=c.registros.filter(x=>x.tipo==='cita');
   const totalFacturado=pedidos.reduce((a,x)=>a+(Number(x.total)||0),0);
+  const totalAbonado=pedidos.reduce((a,x)=>a+(Number(x.ab1)||0)+(Number(x.ab2)||0),0);
   const totalSaldo=pedidos.reduce((a,x)=>a+saldo(x),0);
-  let html=`<div class="perfil-back" onclick="volverClientes()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>Volver a clientes</div>
-  <div style="background:var(--text);border-radius:var(--radius);padding:20px;margin-bottom:12px"><div style="display:flex;align-items:center;gap:14px"><div style="width:60px;height:60px;border-radius:50%;background:#e87060;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;font-family:'DM Serif Display',serif">${iniciales(c.nombre)}</div><div><div style="font-family:'DM Serif Display',serif;font-size:22px;color:#fff">${c.nombre}</div>${c.tel?`<div style="font-size:13px;color:rgba(255,255,255,.65);margin-top:3px">📞 ${c.tel}</div>`:''}</div></div></div>`;
-  
+  const sorted=[...c.registros].sort((a,b)=>{const fa=a.tipo==='cita'?a.fecha:a.fentrega||a.fventa||'';const fb=b.tipo==='cita'?b.fecha:b.fentrega||b.fventa||'';return fa<fb?1:-1;});
+  const ultimaDir=c.dir||([...c.registros].reverse().find(x=>x.dir2||x.dir)||{}).dir2||([...c.registros].reverse().find(x=>x.dir)||{}).dir||'';
+
+  let html=`
+  <div class="perfil-back" onclick="volverClientes()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Volver a clientes</div>
+  <div style="background:var(--text);border-radius:var(--radius);padding:20px;margin-bottom:12px;position:relative;overflow:hidden">
+    <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.05)"></div>
+    <div style="position:absolute;bottom:-30px;right:20px;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.04)"></div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      <div style="width:60px;height:60px;border-radius:50%;background:#e87060;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0;font-family:'DM Serif Display',serif">${iniciales(c.nombre)}</div>
+      <div>
+        <div style="font-family:'DM Serif Display',serif;font-size:22px;color:#fff;line-height:1.1">${c.nombre}</div>
+        ${c.tel?`<a href="tel:${c.tel}" style="font-size:13px;color:rgba(255,255,255,.65);text-decoration:none;margin-top:3px;display:block">📞 ${c.tel}</a>`:'<div style="font-size:13px;color:rgba(255,255,255,.4);margin-top:3px">Sin teléfono</div>'}
+        ${ultimaDir?`<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">📍 ${ultimaDir}</div>`:''}
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:20px;font-weight:700;color:#fff">${citas.length}</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">Citas</div>
+      </div>
+      <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:20px;font-weight:700;color:#fff">${pedidos.length}</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">Pedidos</div>
+      </div>
+      <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:20px;font-weight:700;color:${totalSaldo<=0&&totalFacturado>0?'#6ee7b7':totalSaldo>0?'#fca5a5':'#fff'}">${totalSaldo<=0&&totalFacturado>0?'✓':totalSaldo>0?'!':'—'}</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">Pago</div>
+      </div>
+    </div>
+  </div>`;
+
   if(totalFacturado>0){
-    html+=`<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:600">Total facturado</span><span style="color:var(--blue);font-weight:700">${fmtM(totalFacturado)}</span></div><div style="display:flex;justify-content:space-between"><span style="font-weight:600">Saldo pendiente</span><span style="color:${totalSaldo<=0?'var(--green)':'var(--red)'};font-weight:700">${totalSaldo<=0?'✓ Pagado al día':fmtM(totalSaldo)}</span></div></div>`;
+    html+=`
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="sec-title" style="margin:0">💰 Resumen financiero</div>
+        <button class="btn-outline" style="font-size:11px;padding:5px 10px" onclick="descargarPDF('${k}')">📄 PDF</button>
+      </div>
+      <div class="info-row"><span class="info-label">Total facturado</span><span class="info-val" style="font-weight:700;font-size:15px;color:var(--blue)">${fmtM(totalFacturado)}</span></div>
+      <div class="info-row"><span class="info-label">Total abonado</span><span class="info-val" style="color:var(--amber);font-weight:600">${fmtM(totalAbonado)}</span></div>
+      <div class="info-row" style="border-bottom:none"><span class="info-label">Saldo pendiente</span>
+        <span class="info-val" style="font-weight:700;font-size:15px;color:${totalSaldo<=0?'var(--green)':'var(--red)'}">
+          ${totalSaldo<=0?'✓ Pagado al día':fmtM(totalSaldo)}
+        </span>
+      </div>
+    </div>`;
   }
-  
-  html+=`<div class="sec-title">Historial</div>`;
-  const sorted=[...c.registros].sort((a,b)=>{const fa=a.tipo==='cita'?a.fecha:a.fentrega||'';const fb=b.tipo==='cita'?b.fecha:b.fentrega||'';return fa<fb?1:-1;});
+
+  html+=`<div class="sec-title">📋 Historial (${c.registros.length})</div>`;
   html+=sorted.map(x=>{
     const esCita=x.tipo==='cita';
-    const fecha=esCita?x.fecha:x.fentrega||'';
+    const fecha=esCita?x.fecha:x.fentrega||x.fventa||'';
     const lbl={pendiente:'Pendiente',confirmada:'Confirmada',entregado:'Entregado',cancelado:'Cancelado'};
     const bc={pendiente:'pend',confirmada:'conf',entregado:'ent',cancelado:'canc'}[x.estado]||'pend';
-    return`<div class="card-sm"><div style="display:flex;justify-content:space-between;align-items:center"><div><span style="font-weight:600">${esCita?'📅 Cita':'📦 Pedido'}</span><span style="font-size:11px;color:var(--text2);margin-left:8px">${fmt(fecha)}</span></div><span class="badge ${bc}">${lbl[x.estado]}</span></div></div>`;
+    const s=saldo(x);
+    return`<div class="card" style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:16px">${esCita?'📅':'📦'}</span>
+          <div>
+            <div style="font-size:13px;font-weight:600">${esCita?'Cita':'Pedido'}</div>
+            <div style="font-size:11px;color:var(--text3)">${fmt(fecha)||'Sin fecha'}${(esCita?x.hora:x.hentrega)?' · '+(esCita?x.hora:x.hentrega)+'h':''}</div>
+          </div>
+        </div>
+        <span class="badge ${bc}">${lbl[x.estado]}</span>
+      </div>
+      ${x.tipo==='pedido'&&x.total?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px"><span class="money-pill mp-total">${fmtM(x.total)}</span>${x.ab1?`<span class="money-pill mp-ab">Ab.1 ${fmtM(x.ab1)}</span>`:''}${x.ab2?`<span class="money-pill mp-ab">Ab.2 ${fmtM(x.ab2)}</span>`:''}<span class="money-pill ${s<=0?'mp-ok':'mp-saldo'}">${s<=0?'Pagado':'Saldo '+fmtM(s)}</span></div>`:''}
+      ${x.tipo==='cita'&&x.pcita?`<span class="money-pill mp-total" style="margin-bottom:6px;display:inline-block">Cotiz. ${fmtM(x.pcita)}</span>`:''}
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+        <button class="btn-outline" style="font-size:11px;padding:4px 8px" onclick="abrirEditar('${x.id}')">✏️ Editar</button>
+        ${x.estado==='pendiente'&&esCita?`<button class="btn-green" style="font-size:11px;padding:4px 8px" onclick="cambiarEstado('${x.id}','confirmada')">✓ Confirmar</button>`:''}
+        ${x.estado!=='cancelado'&&x.estado!=='entregado'?`<button class="btn-red" style="font-size:11px;padding:4px 8px" onclick="cambiarEstado('${x.id}','cancelado')">Cancelar</button>`:''}
+      </div>
+    </div>`;
   }).join('');
-  
+  if(c.registros.length===0) html+='<div class="empty"><p>Sin registros aún</p></div>';
   document.getElementById('vista-perfil').innerHTML=html;
+  document.getElementById('vista-perfil').scrollTop=0;
 }
 
 window.volverClientes = function(){perfilActivo=null;renderClientes();}
 
-// ============ EDITAR ============
+// ============ PDF ============
+window.descargarPDF = function(k){
+  const clientes=getClientes();
+  const c=clientes.find(x=>normNom(x.nombre)===k);
+  if(!c) return;
+  const pedidos=c.registros.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado');
+  const totalFacturado=pedidos.reduce((a,x)=>a+(Number(x.total)||0),0);
+  const totalAb1=pedidos.reduce((a,x)=>a+(Number(x.ab1)||0),0);
+  const totalAb2=pedidos.reduce((a,x)=>a+(Number(x.ab2)||0),0);
+  const totalSaldo=pedidos.reduce((a,x)=>a+saldo(x),0);
+  const el=document.getElementById('pdf-preview');
+  const fechaHoy=new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
+  let pedHtml='';
+  pedidos.forEach((x,i)=>{
+    const extras=['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'].filter(ek=>x['x_'+ek]).join(', ');
+    pedHtml+=`<tr><td>${i+1}</td><td>${fmt(x.fventa)||'—'}</td><td>${fmt(x.fentrega)||'—'}</td><td>${x.piedra||'—'}</td><td>${x.melamina||'—'}</td><td>${extras||'—'}</td><td style="text-align:right">${fmtM(x.total)||'—'}</td><td style="text-align:right">${fmtM(x.ab1)||'—'}</td><td style="text-align:right">${fmtM(x.ab2)||'—'}</td><td style="text-align:right;font-weight:600;color:${saldo(x)<=0?'#1a6b4a':'#c0392b'}">${saldo(x)<=0?'Pagado':fmtM(saldo(x))}</td></tr>`;
+  });
+  el.innerHTML=`<div class="pdf-logo"><span>Fig</span>Anzi.</div><div style="font-size:11px;color:#999;margin-bottom:16px">Penco, Biobío · ${fechaHoy}</div><h2 style="font-size:16px;margin-bottom:6px">Ficha: ${c.nombre}</h2>
+  ${pedidos.length>0?`<div class="pdf-section"><h3>Pedidos</h3><table><thead><tr><th>#</th><th>F. Venta</th><th>F. Entrega</th><th>Piedra</th><th>Melamina</th><th>Extras</th><th>Total</th><th>Ab1</th><th>Ab2</th><th>Saldo</th></tr></thead><tbody>${pedHtml}</tbody><tfoot><tr class="total-row"><td colspan="6">TOTALES</td><td>${fmtM(totalFacturado)}</td><td>${fmtM(totalAb1)}</td><td>${fmtM(totalAb2)}</td><td style="color:${totalSaldo<=0?'#1a6b4a':'#c0392b'}">${totalSaldo<=0?'PAGADO':fmtM(totalSaldo)}</td></tr></tfoot></table></div>`:''}
+  <div class="disclaimer">Documento interno FigAnzi. No representa factura formal.</div>`;
+  el.style.display='block';
+  window.print();
+  setTimeout(()=>{el.style.display='none';},1000);
+}
+
+// ============ EDITAR Y GUARDAR ============
 window.abrirEditar = function(id){
   const x=getData().find(d=>d.id===id);
   if(!x) return;
@@ -620,7 +719,6 @@ window.guardarEdicion = async function(id){
 window.cerrarModal = function(){document.getElementById('modal-editar').classList.remove('open');}
 document.getElementById('modal-editar').addEventListener('click',function(e){if(e.target===this) cerrarModal();});
 
-// ============ GUARDAR NUEVO ============
 function actualizarDatalist(){
   const clientes=getClientes();
   document.getElementById('clientes-list').innerHTML=clientes.map(c=>`<option value="${c.nombre}">`).join('');
@@ -633,16 +731,20 @@ window.guardar = async function(){
   if(tipoActual==='cita'){
     const fecha=document.getElementById('f-fcita').value;
     if(!fecha){alert('Selecciona la fecha de la cita.');return;}
-    Object.assign(base,{fecha, hora: document.getElementById('f-hcita').value, lcita: document.getElementById('f-lcita').value.trim(), qcita: document.getElementById('f-qcita').value.trim(), pcita: document.getElementById('f-pcita').value||null});
+    Object.assign(base,{fecha, hora: document.getElementById('f-hcita').value, lcita: document.getElementById('f-lcita').value.trim(), qcita: document.getElementById('f-qcita').value.trim(), pcita: document.getElementById('f-pcita').value||null, piedraC: document.getElementById('f-piedra-c').value.trim(), ncita: document.getElementById('f-ncita').value.trim()});
   } else {
     const fe=document.getElementById('f-fentrega').value;
     if(!fe){alert('Selecciona la propuesta de entrega.');return;}
-    Object.assign(base,{fventa: document.getElementById('f-fventa').value, fentrega: fe, total: document.getElementById('f-total').value||null, ab1: document.getElementById('f-ab1').value||null, ab2: document.getElementById('f-ab2').value||null});
+    const extras={};
+    ['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'].forEach(ek=>{extras['x_'+ek]=document.getElementById('x-'+ek).checked;});
+    Object.assign(base,{fventa: document.getElementById('f-fventa').value, fentrega: fe, hentrega: document.getElementById('f-hentrega').value, dir2: document.getElementById('f-dir2').value.trim(), piedra: document.getElementById('f-piedra').value, melamina: document.getElementById('f-melamina').value.trim(), croquis: document.getElementById('f-croquis').value.trim(), total: document.getElementById('f-total').value||null, ab1: document.getElementById('f-ab1').value||null, ab2: document.getElementById('f-ab2').value||null, formaPago: document.getElementById('f-pago').value, nped: document.getElementById('f-nped').value.trim(), ...extras});
   }
   try {
     await saveData(null, base);
     document.querySelectorAll('#p-nuevo input:not([type=checkbox])').forEach(el=>{if(el.type==='time') el.value='10:00';else el.value='';});
     document.querySelectorAll('#p-nuevo textarea').forEach(el=>el.value='');
+    document.querySelectorAll('#p-nuevo select').forEach(el=>el.value='');
+    document.querySelectorAll('#p-nuevo input[type=checkbox]').forEach(el=>el.checked=false);
     go('hoy');
   } catch(e) { alert('Error al guardar: ' + e.message); }
 }
