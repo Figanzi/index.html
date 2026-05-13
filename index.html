@@ -748,7 +748,10 @@ window.guardar = async function(){
     const fe=document.getElementById('f-fentrega').value;
     if(!fe){alert('Selecciona la propuesta de entrega.');return;}
     const extras={};
-    ['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'].forEach(ek=>{extras['x_'+ek]=document.getElementById('x-'+ek).checked;});
+   const nombres=['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'];
+document.querySelectorAll('#extras-grid .extra-btn').forEach((btn,i)=>{
+  extras['x_'+nombres[i]]=btn.classList.contains('sel');
+});
     Object.assign(base,{fventa: document.getElementById('f-fventa').value, fentrega: fe, hentrega: document.getElementById('f-hentrega').value, dir2: document.getElementById('f-dir2').value.trim(), piedra: document.getElementById('f-piedra').value, melamina: document.getElementById('f-melamina').value.trim(), croquis: document.getElementById('f-croquis').value.trim(), total: document.getElementById('f-total').value||null, ab1: document.getElementById('f-ab1').value||null, ab2: document.getElementById('f-ab2').value||null, formaPago: document.getElementById('f-pago').value, nped: document.getElementById('f-nped').value.trim(), ...extras});
   }
   try {
@@ -756,7 +759,7 @@ window.guardar = async function(){
     document.querySelectorAll('#p-nuevo input:not([type=checkbox])').forEach(el=>{if(el.type==='time') el.value='10:00';else el.value='';});
     document.querySelectorAll('#p-nuevo textarea').forEach(el=>el.value='');
     document.querySelectorAll('#p-nuevo select').forEach(el=>el.value='');
-    document.querySelectorAll('#p-nuevo input[type=checkbox]').forEach(el=>el.checked=false);
+    document.querySelectorAll('#extras-grid .extra-btn').forEach(btn=>btn.classList.remove('sel'));
     go('hoy');
   } catch(e) { alert('Error al guardar: ' + e.message); }
 }
