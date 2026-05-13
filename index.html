@@ -162,8 +162,8 @@ textarea{resize:vertical;min-height:80px}
 #pdf-preview .pdf-logo span{color:#c0392b}
 #pdf-preview table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
 #pdf-preview td,#pdf-preview th{border:1px solid #ddd;padding:7px 10px}
-#pdf-preview th{background:#f5f3ef;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
-#pdf-preview .disclaimer{font-size:10px;color:#999;margin-top:20px;text-align:center;font-style:italic}
+#pdf-preview th{background:#f5f3ef;font-weight:600;font-size:11px;text-transform:uppercase}
+#pdf-preview .disclaimer{font-size:11px;color:#c0392b;margin-top:20px;text-align:center;font-weight:600;border:2px solid #c0392b;padding:10px;border-radius:6px}
 </style>
 </head>
 <body>
@@ -198,14 +198,14 @@ textarea{resize:vertical;min-height:80px}
       </div>
       <div class="sec-title">Agenda de hoy</div>
       <div id="lista-hoy"></div>
-      <div class="sec-title">Próximas citas (7 días)</div>
+      <div class="sec-title">Próximos (7 días)</div>
       <div id="lista-prox"></div>
     </div>
 
     <div class="pane" id="p-cal">
       <div class="cal-header"><h2 id="cal-titulo"></h2><div class="cal-nav"><button onclick="calNav(-1)">‹</button><button onclick="calNav(1)">›</button></div></div>
       <div class="cal-grid" id="cal-grid"></div>
-      <div class="sec-title" id="cal-sel-titulo">Todos los eventos del mes</div>
+      <div class="sec-title" id="cal-sel-titulo">Eventos del mes</div>
       <div id="cal-events"></div>
     </div>
 
@@ -317,6 +317,7 @@ async function saveData(docId, datos) {
   return docId;
 }
 
+// ============ UTILS ============
 function hoy(){return new Date().toISOString().split('T')[0]}
 function fmt(s){if(!s)return'';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`}
 function fmtM(n){if(!n&&n!==0)return null;return'$'+Math.round(Number(n)).toLocaleString('es-CL')}
@@ -325,17 +326,13 @@ function saldo(x){return(Number(x.total)||0)-(Number(x.ab1)||0)-(Number(x.ab2)||
 function mesStr(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
 function nombreMes(d){return d.toLocaleDateString('es-CL',{month:'long',year:'numeric'})}
 
-let tipoActual='cita';
-let filtroClientes='todos';
-let calFecha=new Date();
-let calSelDia=null;
-let perfilActivo=null;
+let tipoActual='cita', filtroClientes='todos', calFecha=new Date(), calSelDia=null, perfilActivo=null;
 
+// ============ NAV ============
 window.go = function(p){
   document.querySelectorAll('.pane').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
-  const pane=document.getElementById('p-'+p);
-  const navBtn=document.getElementById('n-'+p);
+  const pane=document.getElementById('p-'+p), navBtn=document.getElementById('n-'+p);
   if(pane) pane.classList.add('active');
   if(navBtn) navBtn.classList.add('active');
   if(p==='hoy') renderHoy();
@@ -352,6 +349,7 @@ window.selTipo = function(t,el){
   document.getElementById('bloque-pedido').style.display=t==='pedido'?'block':'none';
 }
 
+// ============ HOY ============
 function renderHoy(){
   const data=getData(), h=hoy();
   const citas=data.filter(x=>x.tipo==='cita'&&x.fecha===h&&x.estado!=='cancelado');
@@ -388,9 +386,7 @@ function renderHoy(){
 }
 
 function miniCard(x){
-  const esCita=x.tipo==='cita';
-  const fecha=esCita?x.fecha:x.fentrega;
-  const hora=esCita?x.hora:x.hentrega;
+  const esCita=x.tipo==='cita', fecha=esCita?x.fecha:x.fentrega, hora=esCita?x.hora:x.hentrega;
   const lbl={pendiente:'Pendiente',confirmada:'Confirmada',entregado:'Entregado',cancelado:'Cancelado'};
   const bc={pendiente:'pend',confirmada:'conf',entregado:'ent',cancelado:'canc'}[x.estado]||'pend';
   const s=saldo(x);
@@ -424,43 +420,31 @@ window.cambiarEstado = async function(id, est){
   } catch(e) { alert('Error al guardar.'); }
 }
 
-window.calNav = function(dir){
-  calFecha=new Date(calFecha.getFullYear(),calFecha.getMonth()+dir,1);
-  calSelDia=null;
-  renderCal();
-}
+// ============ CALENDARIO ============
+window.calNav = function(dir){ calFecha=new Date(calFecha.getFullYear(),calFecha.getMonth()+dir,1); calSelDia=null; renderCal(); }
 
 function renderCal(){
   const data=getData();
   document.getElementById('cal-titulo').textContent=nombreMes(calFecha).replace(/^\w/,c=>c.toUpperCase());
   const y=calFecha.getFullYear(), m=calFecha.getMonth();
-  const primer=new Date(y,m,1);
-  const ultimo=new Date(y,m+1,0);
-  let dias=[];
-  let dow=(primer.getDay()+6)%7;
-  for(let i=dow-1;i>=0;i--){const d=new Date(y,m,-i); dias.push({fecha:d,otroMes:true});}
+  const primer=new Date(y,m,1), ultimo=new Date(y,m+1,0);
+  let dias=[], dow=(primer.getDay()+6)%7;
+  for(let i=dow-1;i>=0;i--){ dias.push({fecha:new Date(y,m,-i),otroMes:true});}
   for(let d=1;d<=ultimo.getDate();d++) dias.push({fecha:new Date(y,m,d),otroMes:false});
   while(dias.length%7!==0) dias.push({fecha:new Date(y,m+1,dias.length-ultimo.getDate()-dow+1),otroMes:true});
 
   const mesActual=mesStr(calFecha);
   const eventosDelMes=data.filter(x=>{const f=x.tipo==='cita'?x.fecha:x.fentrega;return f&&f.startsWith(mesActual)&&x.estado!=='cancelado';});
-
-  const hoyS=hoy();
-  const names=['Lu','Ma','Mi','Ju','Vi','Sá','Do'];
+  const hoyS=hoy(), names=['Lu','Ma','Mi','Ju','Vi','Sá','Do'];
   let html=names.map(n=>`<div class="cal-day-name">${n}</div>`).join('');
+
   dias.forEach(({fecha,otroMes})=>{
     const fs=fecha.toISOString().split('T')[0];
     const tieneCitas=eventosDelMes.filter(x=>x.tipo==='cita'&&x.fecha===fs).length>0;
     const tienePedidos=eventosDelMes.filter(x=>x.tipo==='pedido'&&x.fentrega===fs).length>0;
-    const isHoy=fs===hoyS;
-    const isSel=fs===calSelDia;
+    const isHoy=fs===hoyS, isSel=fs===calSelDia;
     const cls=['cal-day',otroMes?'other-month':'',isHoy?'today':'',isSel&&!isHoy?'selected':'',(tieneCitas||tienePedidos)?'has-event':''].filter(Boolean).join(' ');
-    html+=`<div class="${cls}" onclick="selDiaCal('${fs}')">
-      ${fecha.getDate()}
-      ${tieneCitas&&!isHoy?`<div class="dot" style="background:var(--red)"></div>`:''}
-      ${tienePedidos&&!tieneCitas&&!isHoy?`<div class="dot" style="background:var(--blue)"></div>`:''}
-      ${(tieneCitas||tienePedidos)&&isHoy?`<div class="dot" style="background:#fff"></div>`:''}
-    </div>`;
+    html+=`<div class="${cls}" onclick="selDiaCal('${fs}')">${fecha.getDate()}${tieneCitas&&!isHoy?`<div class="dot" style="background:var(--red)"></div>`:''}${tienePedidos&&!tieneCitas&&!isHoy?`<div class="dot" style="background:var(--blue)"></div>`:''}${(tieneCitas||tienePedidos)&&isHoy?`<div class="dot" style="background:#fff"></div>`:''}</div>`;
   });
   document.getElementById('cal-grid').innerHTML=html;
 
@@ -474,14 +458,13 @@ function renderCal(){
     document.getElementById('cal-events').innerHTML=todos.length===0?'<div class="empty" style="padding:20px"><p>Sin eventos este mes</p></div>':todos.map(miniCard).join('');
   }
 }
-
 window.selDiaCal = function(fs){calSelDia=calSelDia===fs?null:fs;renderCal();}
 
+// ============ CLIENTES ============
 function normNom(n){return n.trim().toLowerCase()}
 
 function getClientes(){
-  const data=getData();
-  const map={};
+  const data=getData(), map={};
   data.forEach(x=>{
     const k=normNom(x.nombre);
     if(!map[k]) map[k]={nombre:x.nombre,tel:x.tel||x.telefono||'',dir:x.dir||'',registros:[]};
@@ -507,21 +490,16 @@ function renderClientes(){
   if(filtroClientes==='pagado') clientes=clientes.filter(c=>c.registros.some(x=>x.tipo==='pedido'&&saldo(x)<=0&&x.estado!=='cancelado'));
   clientes.sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
 
-  if(clientes.length===0){
-    document.getElementById('lista-clientes').innerHTML='<div class="empty"><div class="empty-icon">👤</div><p>Sin clientes registrados</p></div>';
-    return;
-  }
+  if(clientes.length===0){ document.getElementById('lista-clientes').innerHTML='<div class="empty"><div class="empty-icon">👤</div><p>Sin clientes</p></div>'; return; }
 
   document.getElementById('lista-clientes').innerHTML=clientes.map(c=>{
     const pedidos=c.registros.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado');
     const totalFacturado=pedidos.reduce((a,x)=>a+(Number(x.total)||0),0);
     const totalSaldo=pedidos.reduce((a,x)=>a+saldo(x),0);
     const pagoStatus=totalSaldo<=0&&totalFacturado>0?'pago-ok':totalSaldo>0?'pago-no':'';
-    const nCitas=c.registros.filter(x=>x.tipo==='cita').length;
-    const nPed=pedidos.length;
     return`<div class="cliente-card" onclick="abrirPerfil('${normNom(c.nombre)}')">
       <div class="cliente-head"><div class="cliente-avatar">${iniciales(c.nombre)}</div><div class="cliente-info"><h3>${c.nombre}</h3><p>${c.tel||'Sin teléfono'}</p></div></div>
-      <div class="cliente-meta"><span class="badge pend">${nCitas} cita${nCitas!==1?'s':''}</span><span class="badge conf">${nPed} pedido${nPed!==1?'s':''}</span>${pagoStatus?`<span class="badge ${pagoStatus}">${totalSaldo<=0&&totalFacturado>0?'Pagado al día':'Saldo pendiente'}</span>`:''}</div>
+      <div class="cliente-meta"><span class="badge pend">${c.registros.filter(x=>x.tipo==='cita').length} citas</span><span class="badge conf">${pedidos.length} pedidos</span>${pagoStatus?`<span class="badge ${pagoStatus}">${totalSaldo<=0&&totalFacturado>0?'Pagado':'Saldo pendiente'}</span>`:''}</div>
     </div>`;
   }).join('');
 }
@@ -538,8 +516,7 @@ window.abrirPerfil = function(k){
 }
 
 function renderPerfil(k){
-  const clientes=getClientes();
-  const c=clientes.find(x=>normNom(x.nombre)===k);
+  const clientes=getClientes(), c=clientes.find(x=>normNom(x.nombre)===k);
   if(!c){perfilActivo=null;renderClientes();return;}
   const pedidos=c.registros.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado');
   const citas=c.registros.filter(x=>x.tipo==='cita');
@@ -570,10 +547,7 @@ function renderPerfil(k){
     const esCita=x.tipo==='cita';
     const extras=['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'].filter(ek=>x['x_'+ek]);
     html+=`<div class="card" style="margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <span style="font-weight:600;font-size:14px">${esCita?'📅 Cita':'📦 Pedido'}</span>
-        <span class="badge ${({pendiente:'pend',confirmada:'conf',entregado:'ent',cancelado:'canc'})[x.estado]||'pend'}">${x.estado||'pendiente'}</span>
-      </div>`;
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-weight:600;font-size:14px">${esCita?'📅 Cita':'📦 Pedido'}</span><span class="badge ${({pendiente:'pend',confirmada:'conf',entregado:'ent',cancelado:'canc'})[x.estado]||'pend'}">${x.estado||'pendiente'}</span></div>`;
     if(esCita){
       html+=`<div class="info-row"><span class="info-label">Fecha</span><span class="info-val">${fmt(x.fecha)} ${x.hora||''}</span></div>
       <div class="info-row"><span class="info-label">Lugar</span><span class="info-val">${x.lcita||'—'}</span></div>
@@ -602,53 +576,111 @@ function renderPerfil(k){
   });
   document.getElementById('vista-perfil').innerHTML=html;
 }
-
 window.volverClientes = function(){perfilActivo=null;renderClientes();}
 
+// ============ PDF ============
 window.descargarPDF = function(k){
-  const clientes=getClientes();
-  const c=clientes.find(x=>normNom(x.nombre)===k);
+  const clientes=getClientes(), c=clientes.find(x=>normNom(x.nombre)===k);
   if(!c) return;
   const pedidos=c.registros.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado');
   const totalFacturado=pedidos.reduce((a,x)=>a+(Number(x.total)||0),0);
-  const totalAb1=pedidos.reduce((a,x)=>a+(Number(x.ab1)||0),0);
-  const totalAb2=pedidos.reduce((a,x)=>a+(Number(x.ab2)||0),0);
+  const totalAbonado=pedidos.reduce((a,x)=>a+(Number(x.ab1)||0)+(Number(x.ab2)||0),0);
   const totalSaldo=pedidos.reduce((a,x)=>a+saldo(x),0);
   const el=document.getElementById('pdf-preview');
-  let pedHtml='';
+  const fechaHoy=new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
+
+  let html=`<div style="text-align:center;margin-bottom:16px"><div class="pdf-logo"><span>Fig</span>Anzi.</div><div style="font-size:11px;color:#999">Penco, Biobío · ${fechaHoy}</div></div>
+  <div style="border:2px solid #1a1714;border-radius:8px;padding:14px;margin-bottom:14px"><h2 style="font-size:18px;margin-bottom:8px">Cliente: ${c.nombre}</h2>${c.tel?`<div style="font-size:13px;margin-bottom:4px">📞 ${c.tel}</div>`:''}${c.dir?`<div style="font-size:13px">📍 ${c.dir}</div>`:''}</div>`;
+
   pedidos.forEach((x,i)=>{
-    const extras=['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'].filter(ek=>x['x_'+ek]).join(', ');
-    pedHtml+=`<tr><td>${i+1}</td><td>${fmt(x.fventa)||'—'}</td><td>${fmt(x.fentrega)||'—'}</td><td>${x.piedra||'—'}</td><td>${x.melamina||'—'}</td><td>${extras||'—'}</td><td>${fmtM(x.total)||'—'}</td><td>${fmtM(x.ab1)||'—'}</td><td>${fmtM(x.ab2)||'—'}</td><td>${saldo(x)<=0?'Pagado':fmtM(saldo(x))}</td></tr>`;
+    const extras=['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'].filter(ek=>x['x_'+ek]);
+    html+=`<div style="border:1px solid #ddd;border-radius:6px;padding:12px;margin-bottom:10px"><h3 style="font-size:14px;margin-bottom:8px">📦 Pedido ${i+1} — ${x.estado||'pendiente'}</h3>
+    <table style="width:100%;border:none;font-size:12px">
+      <tr><td style="border:none;padding:2px 8px 2px 0;color:#666;font-weight:600">Fecha venta</td><td style="border:none;padding:2px 0">${fmt(x.fventa)||'—'}</td></tr>
+      <tr><td style="border:none;padding:2px 8px 2px 0;color:#666;font-weight:600">Fecha entrega</td><td style="border:none;padding:2px 0">${fmt(x.fentrega)||'—'} ${x.hentrega||''}</td></tr>
+      ${x.dir2?`<tr><td style="border:none;padding:2px 8px 2px 0;color:#666;font-weight:600">Dir. entrega</td><td style="border:none;padding:2px 0">${x.dir2}</td></tr>`:''}
+      ${x.piedra?`<tr><td style="border:none;padding:2px 8px 2px 0;color:#666;font-weight:600">Piedra</td><td style="border:none;padding:2px 0">${x.piedra}</td></tr>`:''}
+      ${x.melamina?`<tr><td style="border:none;padding:2px 8px 2px 0;color:#666;font-weight:600">Melamina</td><td style="border:none;padding:2px 0">${x.melamina}</td></tr>`:''}
+      ${extras.length?`<tr><td style="border:none;padding:2px 8px 2px 0;color:#666;font-weight:600">Extras</td><td style="border:none;padding:2px 0">${extras.join(', ')}</td></tr>`:''}
+      ${x.croquis?`<tr><td style="border:none;padding:2px 8px 2px 0;color:#666;font-weight:600">Croquis</td><td style="border:none;padding:2px 0">${x.croquis}</td></tr>`:''}
+      ${x.formaPago?`<tr><td style="border:none;padding:2px 8px 2px 0;color:#666;font-weight:600">Forma pago</td><td style="border:none;padding:2px 0">${x.formaPago}</td></tr>`:''}
+    </table>
+    <div style="border-top:1px solid #ddd;margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:600">Total</span><span style="font-weight:700;color:#1a3a6b">${fmtM(x.total)}</span></div>
+    ${x.ab1?`<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:4px"><span>Abono 1</span><span style="color:#8a5a00">${fmtM(x.ab1)}</span></div>`:''}
+    ${x.ab2?`<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:4px"><span>Abono 2</span><span style="color:#8a5a00">${fmtM(x.ab2)}</span></div>`:''}
+    <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:4px;font-weight:600"><span>Saldo</span><span style="color:${saldo(x)<=0?'#1a6b4a':'#c0392b'}">${saldo(x)<=0?'✓ Pagado':fmtM(saldo(x))}</span></div>
+    ${x.nped?`<div style="font-size:11px;color:#666;margin-top:6px">📝 ${x.nped}</div>`:''}</div>`;
   });
-  el.innerHTML=`<div class="pdf-logo"><span>Fig</span>Anzi.</div><h2>Ficha: ${c.nombre}</h2>
-  ${pedidos.length>0?`<table><thead><tr><th>#</th><th>Venta</th><th>Entrega</th><th>Piedra</th><th>Melamina</th><th>Extras</th><th>Total</th><th>Ab1</th><th>Ab2</th><th>Saldo</th></tr></thead><tbody>${pedHtml}</tbody><tfoot><tr class="total-row"><td colspan="6">TOTALES</td><td>${fmtM(totalFacturado)}</td><td>${fmtM(totalAb1)}</td><td>${fmtM(totalAb2)}</td><td>${totalSaldo<=0?'PAGADO':fmtM(totalSaldo)}</td></tr></tfoot></table>`:''}
-  <div class="disclaimer">Documento interno FigAnzi.</div>`;
-  el.style.display='block';
-  window.print();
+
+  html+=`<div style="border-top:3px double #1a1714;margin-top:14px;padding-top:10px"><div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700"><span>TOTAL FACTURADO</span><span style="color:#1a3a6b">${fmtM(totalFacturado)}</span></div><div style="display:flex;justify-content:space-between;font-size:14px;margin-top:4px"><span>TOTAL ABONADO</span><span style="color:#8a5a00">${fmtM(totalAbonado)}</span></div><div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-top:4px"><span>SALDO</span><span style="color:${totalSaldo<=0?'#1a6b4a':'#c0392b'}">${totalSaldo<=0?'✓ PAGADO':fmtM(totalSaldo)}</span></div></div>`;
+
+  html+=`<div class="disclaimer">⚠️ Este documento NO es una boleta o factura oficial. Es solo para uso informativo interno de FigAnzi. Los precios, materiales y fechas están sujetos a cambios sin previo aviso. Para consultas, contactar directamente.</div>`;
+
+  el.innerHTML=html; el.style.display='block'; window.print();
   setTimeout(()=>{el.style.display='none';},1000);
 }
 
+// ============ EDITAR COMPLETO ============
 window.abrirEditar = function(id){
   const x=getData().find(d=>d.id===id);
   if(!x) return;
-  document.getElementById('modal-title').textContent=x.tipo==='cita'?'Editar cita':'Editar pedido';
-  let html=`<div class="form-section"><label>Nombre</label><input type="text" id="e-nom" value="${x.nombre||''}"></div><div class="form-section"><label>Estado</label><select id="e-estado"><option value="pendiente" ${x.estado==='pendiente'?'selected':''}>Pendiente</option><option value="confirmada" ${x.estado==='confirmada'?'selected':''}>Confirmada</option><option value="entregado" ${x.estado==='entregado'?'selected':''}>Entregado</option><option value="cancelado" ${x.estado==='cancelado'?'selected':''}>Cancelado</option></select></div><div class="btn-row"><button class="btn-main" onclick="guardarEdicion('${id}')">Guardar</button><button class="btn-outline" onclick="cerrarModal()">Cancelar</button></div>`;
+  const esCita=x.tipo==='cita';
+  document.getElementById('modal-title').textContent=esCita?'✏️ Editar cita':'✏️ Editar pedido';
+
+  let html=`<div class="form-section"><label>Nombre</label><input type="text" id="e-nom" value="${x.nombre||''}"></div>
+  <div class="row2"><div class="form-section"><label>Teléfono</label><input type="tel" id="e-tel" value="${x.tel||x.telefono||''}"></div><div class="form-section"><label>Dirección</label><input type="text" id="e-dir" value="${x.dir||''}"></div></div>`;
+
+  if(esCita){
+    html+=`<div class="row2"><div class="form-section"><label>Fecha</label><input type="date" id="e-fecha" value="${x.fecha||''}"></div><div class="form-section"><label>Hora</label><input type="time" id="e-hora" value="${x.hora||''}"></div></div>
+    <div class="form-section"><label>Lugar</label><input type="text" id="e-lcita" value="${x.lcita||''}"></div>
+    <div class="form-section"><label>Qué quiere</label><textarea id="e-qcita">${x.qcita||''}</textarea></div>
+    <div class="row2"><div class="form-section"><label>Cotización ($)</label><input type="number" id="e-pcita" value="${x.pcita||''}"></div><div class="form-section"><label>Tipo piedra</label><input type="text" id="e-piedraC" value="${x.piedraC||''}"></div></div>
+    <div class="form-section"><label>Notas</label><textarea id="e-ncita">${x.ncita||''}</textarea></div>
+    <div class="form-section"><label>Estado</label><select id="e-estado"><option value="pendiente" ${x.estado==='pendiente'?'selected':''}>Pendiente</option><option value="confirmada" ${x.estado==='confirmada'?'selected':''}>Confirmada</option><option value="cancelado" ${x.estado==='cancelado'?'selected':''}>Cancelado</option></select></div>`;
+  } else {
+    html+=`<div class="row2"><div class="form-section"><label>Piedra</label><select id="e-piedra"><option value="">Sin piedra</option>${['Granito','Mármol','Silestone','Posformado','Por definir'].map(o=>`<option ${x.piedra===o?'selected':''}>${o}</option>`).join('')}</select></div><div class="form-section"><label>Melamina</label><input type="text" id="e-melamina" value="${x.melamina||''}"></div></div>
+    <div class="form-section"><label>Extras</label><div class="check-grid">${['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'].map(ek=>`<button type="button" class="extra-btn${x['x_'+ek]?' sel':''}" onclick="this.classList.toggle('sel')">${ek.charAt(0).toUpperCase()+ek.slice(1)}</button>`).join('')}</div></div>
+    <div class="form-section"><label>Croquis</label><textarea id="e-croquis">${x.croquis||''}</textarea></div>
+    <div class="row2"><div class="form-section"><label>Fecha venta</label><input type="date" id="e-fventa" value="${x.fventa||''}"></div><div class="form-section"><label>Fecha entrega</label><input type="date" id="e-fentrega" value="${x.fentrega||''}"></div></div>
+    <div class="form-section"><label>Hora entrega</label><input type="time" id="e-hentrega" value="${x.hentrega||''}"></div>
+    <div class="form-section"><label>Dir. entrega</label><input type="text" id="e-dir2" value="${x.dir2||''}"></div><div style="height:1px;background:var(--border);margin:8px 0"></div>
+    <div class="form-section"><label>Total ($)</label><input type="number" id="e-total" value="${x.total||''}"></div>
+    <div class="row2"><div class="form-section"><label>Abono 1 ($)</label><input type="number" id="e-ab1" value="${x.ab1||''}"></div><div class="form-section"><label>Abono 2 ($)</label><input type="number" id="e-ab2" value="${x.ab2||''}"></div></div>
+    <div class="form-section"><label>Forma pago</label><select id="e-pago"><option value="">—</option>${['Efectivo','Transferencia','Débito','Crédito','Mixto'].map(o=>`<option ${x.formaPago===o?'selected':''}>${o}</option>`).join('')}</select></div>
+    <div class="form-section"><label>Notas</label><textarea id="e-nped">${x.nped||''}</textarea></div>
+    <div class="form-section"><label>Estado</label><select id="e-estado"><option value="pendiente" ${x.estado==='pendiente'?'selected':''}>Pendiente</option><option value="entregado" ${x.estado==='entregado'?'selected':''}>Entregado</option><option value="cancelado" ${x.estado==='cancelado'?'selected':''}>Cancelado</option></select></div>`;
+  }
+
+  html+=`<div class="btn-row"><button class="btn-main" onclick="guardarEdicion('${id}','${x.tipo}')">💾 Guardar cambios</button><button class="btn-outline" onclick="cerrarModal()">Cancelar</button></div>
+  <div style="margin-top:10px"><button class="btn-red" onclick="eliminarRegistro('${id}')">🗑️ Eliminar registro</button></div>`;
+
   document.getElementById('modal-body').innerHTML=html;
   document.getElementById('modal-editar').classList.add('open');
 }
 
-window.guardarEdicion = async function(id){
-  const datos={nombre: document.getElementById('e-nom').value.trim(), estado: document.getElementById('e-estado').value};
+window.guardarEdicion = async function(id, tipo){
+  const esCita=tipo==='cita';
+  const datos={nombre: document.getElementById('e-nom').value.trim(), tel: document.getElementById('e-tel').value.trim(), dir: document.getElementById('e-dir').value.trim(), estado: document.getElementById('e-estado').value};
+  if(esCita){
+    Object.assign(datos,{fecha: document.getElementById('e-fecha').value, hora: document.getElementById('e-hora').value, lcita: document.getElementById('e-lcita').value.trim(), qcita: document.getElementById('e-qcita').value.trim(), pcita: document.getElementById('e-pcita').value||null, piedraC: document.getElementById('e-piedraC').value.trim(), ncita: document.getElementById('e-ncita').value.trim()});
+  } else {
+    const extras={};
+    document.querySelectorAll('#modal-body .extra-btn').forEach(btn=>{extras['x_'+btn.textContent.trim().toLowerCase()]=btn.classList.contains('sel');});
+    Object.assign(datos,{piedra: document.getElementById('e-piedra').value, melamina: document.getElementById('e-melamina').value.trim(), croquis: document.getElementById('e-croquis').value.trim(), fventa: document.getElementById('e-fventa').value, fentrega: document.getElementById('e-fentrega').value, hentrega: document.getElementById('e-hentrega').value, dir2: document.getElementById('e-dir2').value.trim(), total: document.getElementById('e-total').value||null, ab1: document.getElementById('e-ab1').value||null, ab2: document.getElementById('e-ab2').value||null, formaPago: document.getElementById('e-pago').value, nped: document.getElementById('e-nped').value.trim(), ...extras});
+  }
   try { await saveData(id, datos); cerrarModal(); } catch(e) { alert('Error al guardar.'); }
+}
+
+window.eliminarRegistro = async function(id){
+  if(!confirm('¿Eliminar este registro permanentemente?')) return;
+  try { const { error } = await supabase.from('registros').delete().eq('id', Number(id)); if(error) throw error; await cargarDatos(); cerrarModal(); } catch(e) { alert('Error al eliminar.'); }
 }
 
 window.cerrarModal = function(){document.getElementById('modal-editar').classList.remove('open');}
 document.getElementById('modal-editar').addEventListener('click',function(e){if(e.target===this) cerrarModal();});
 
-function actualizarDatalist(){
-  const clientes=getClientes();
-  document.getElementById('clientes-list').innerHTML=clientes.map(c=>`<option value="${c.nombre}">`).join('');
-}
+// ============ GUARDAR NUEVO ============
+function actualizarDatalist(){ const clientes=getClientes(); document.getElementById('clientes-list').innerHTML=clientes.map(c=>`<option value="${c.nombre}">`).join(''); }
 
 window.guardar = async function(){
   const nom=document.getElementById('f-nom').value.trim();
@@ -661,11 +693,8 @@ window.guardar = async function(){
   } else {
     const fe=document.getElementById('f-fentrega').value;
     if(!fe){alert('Selecciona la propuesta de entrega.');return;}
-    const extras={};
-    const nombres=['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'];
-    document.querySelectorAll('#extras-grid .extra-btn').forEach((btn,i)=>{
-      extras['x_'+nombres[i]]=btn.classList.contains('sel');
-    });
+    const extras={}, nombres=['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'];
+    document.querySelectorAll('#extras-grid .extra-btn').forEach((btn,i)=>{extras['x_'+nombres[i]]=btn.classList.contains('sel');});
     Object.assign(base,{fventa: document.getElementById('f-fventa').value, fentrega: fe, hentrega: document.getElementById('f-hentrega').value, dir2: document.getElementById('f-dir2').value.trim(), piedra: document.getElementById('f-piedra').value, melamina: document.getElementById('f-melamina').value.trim(), croquis: document.getElementById('f-croquis').value.trim(), total: document.getElementById('f-total').value||null, ab1: document.getElementById('f-ab1').value||null, ab2: document.getElementById('f-ab2').value||null, formaPago: document.getElementById('f-pago').value, nped: document.getElementById('f-nped').value.trim(), ...extras});
   }
   try {
@@ -678,7 +707,7 @@ window.guardar = async function(){
   } catch(e) { alert('Error al guardar: ' + e.message); }
 }
 
-// INIT
+// ============ INIT ============
 async function iniciar(){
   const txt = document.getElementById('loading-overlay').querySelector('.loading-txt');
   try {
@@ -688,11 +717,7 @@ async function iniciar(){
     setSyncStatus('ok');
     renderHoy();
     actualizarDatalist();
-  } catch(e) {
-    console.error(e);
-    txt.textContent = 'Error: ' + e.message;
-    setSyncStatus('error');
-  }
+  } catch(e) { console.error(e); txt.textContent = 'Error: ' + e.message; setSyncStatus('error'); }
 }
 
 const ahora=new Date();
