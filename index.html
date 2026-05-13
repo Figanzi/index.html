@@ -273,6 +273,8 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
   <style>
     .extra-btn{transition:all .15s;user-select:none}
     .extra-btn.sel{background:var(--text);color:#fff;border-color:var(--text)}
+    .extra-btn.sel{background:var(--text)!important;color:#fff!important;border-color:var(--text)!important}
+    .extra-btn.sel::after{content:' ✓';font-size:11px;margin-left:4px}
   </style>
 </div>
         <div class="form-section"><label>Croquis / boceto</label><textarea id="f-croquis" rows="4" placeholder="Ej: Cocina en L, 3m pared norte..."></textarea></div>
