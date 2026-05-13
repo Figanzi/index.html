@@ -257,18 +257,24 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
       <div id="bloque-pedido" style="display:none">
         <div style="height:1px;background:var(--border);margin:4px 0 14px"></div>
         <div class="row2"><div class="form-section"><label>Tipo de piedra</label><select id="f-piedra"><option value="">Sin piedra</option><option>Granito</option><option>Mármol</option><option>Silestone</option><option>Posformado</option><option>Por definir</option></select></div><div class="form-section"><label>Color melamina</label><input type="text" id="f-melamina" placeholder="Ej: Grafito, Blanco..."></div></div>
-        <div class="form-section"><label>Extras incluidos</label><div class="check-grid">
-  <div class="chk" onclick="this.querySelector('input').click()"><input type="checkbox" id="x-enchufe"> Enchufe</div>
-  <div class="chk" onclick="this.querySelector('input').click()"><input type="checkbox" id="x-lavaplatos"> Lavaplatos</div>
-  <div class="chk" onclick="this.querySelector('input').click()"><input type="checkbox" id="x-gas"> Gas</div>
-  <div class="chk" onclick="this.querySelector('input').click()"><input type="checkbox" id="x-horno"> Horno micr.</div>
-  <div class="chk" onclick="this.querySelector('input').click()"><input type="checkbox" id="x-agua"> Agua</div>
-  <div class="chk" onclick="this.querySelector('input').click()"><input type="checkbox" id="x-campana"> Campana</div>
-  <div class="chk" onclick="this.querySelector('input').click()"><input type="checkbox" id="x-piedra"> Piedra</div>
-  <div class="chk" onclick="this.querySelector('input').click()"><input type="checkbox" id="x-copero"> Copero</div>
-  <div class="chk" onclick="this.querySelector('input').click()"><input type="checkbox" id="x-post"> Post</div>
-  <div class="chk" onclick="this.querySelector('input').click()"><input type="checkbox" id="x-peninsula"> Península</div>
-</div></div>
+      <div class="form-section"><label>Extras incluidos</label>
+  <div class="check-grid" id="extras-grid">
+    <div class="chk extra-btn" data-extra="enchufe" onclick="toggleExtra(this)">Enchufe</div>
+    <div class="chk extra-btn" data-extra="lavaplatos" onclick="toggleExtra(this)">Lavaplatos</div>
+    <div class="chk extra-btn" data-extra="gas" onclick="toggleExtra(this)">Gas</div>
+    <div class="chk extra-btn" data-extra="horno" onclick="toggleExtra(this)">Horno micr.</div>
+    <div class="chk extra-btn" data-extra="agua" onclick="toggleExtra(this)">Agua</div>
+    <div class="chk extra-btn" data-extra="campana" onclick="toggleExtra(this)">Campana</div>
+    <div class="chk extra-btn" data-extra="piedra" onclick="toggleExtra(this)">Piedra</div>
+    <div class="chk extra-btn" data-extra="copero" onclick="toggleExtra(this)">Copero</div>
+    <div class="chk extra-btn" data-extra="post" onclick="toggleExtra(this)">Post</div>
+    <div class="chk extra-btn" data-extra="peninsula" onclick="toggleExtra(this)">Península</div>
+  </div>
+  <style>
+    .extra-btn{transition:all .15s;user-select:none}
+    .extra-btn.sel{background:var(--text);color:#fff;border-color:var(--text)}
+  </style>
+</div>
         <div class="form-section"><label>Croquis / boceto</label><textarea id="f-croquis" rows="4" placeholder="Ej: Cocina en L, 3m pared norte..."></textarea></div>
         <div class="row2"><div class="form-section"><label>Fecha de venta</label><input type="date" id="f-fventa"></div><div class="form-section"><label>Propuesta entrega</label><input type="date" id="f-fentrega"></div></div>
         <div class="form-section"><label>Hora de entrega</label><input type="time" id="f-hentrega" value="10:00"></div>
