@@ -278,6 +278,14 @@ textarea{resize:vertical;min-height:80px}
 </nav>
 
 <div class="modal-overlay" id="modal-editar"><div class="modal"><div class="modal-handle"></div><div class="modal-title" id="modal-title"></div><div id="modal-body"></div></div></div>
+  <div class="modal-overlay" id="modal-deudores">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💰 Clientes con saldo pendiente</div>
+    <div id="deudores-body"></div>
+    <button class="btn-outline" style="width:100%;margin-top:12px" onclick="document.getElementById('modal-deudores').classList.remove('open')">Cerrar</button>
+  </div>
+</div>
 <div id="pdf-preview"></div>
 
 <script type="module">
