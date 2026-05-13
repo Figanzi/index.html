@@ -767,7 +767,49 @@ window.guardar = async function(){
     go('hoy');
   } catch(e) { alert('Error al guardar: ' + e.message); }
 }
+window.mostrarDeudores = function(){
+  const data = getData();
+  const deudores = {};
+  
+  data.forEach(x => {
+    if(x.tipo !== 'pedido' || x.estado === 'cancelado') return;
+    const s = saldo(x);
+    if(s <= 0) return;
+    const k = normNom(x.nombre);
+    if(!deudores[k]) deudores[k] = {nombre: x.nombre, tel: x.tel||'', total: 0, pedidos:[]};
+    deudores[k].total += s;
+    deudores[k].pedidos.push(x);
+  });
+  
+  const lista = Object.values(deudores).sort((a,b) => b.total - a.total);
+  
+  if(lista.length === 0){
+    q('deudores-body').innerHTML = '<div class="empty"><div class="empty-icon">🎉</div><p>¡Todos al día!</p></div>';
+  } else {
+    const totalGeneral = lista.reduce((a,x) => a + x.total, 0);
+    let html = `<div class="card" style="margin-bottom:12px;background:var(--red-light);border-color:var(--red-mid)">
+      <div style="display:flex;justify-content:space-between"><span style="font-weight:700;color:var(--red)">TOTAL POR COBRAR</span><span style="font-weight:700;color:var(--red);font-size:18px">${fmtM(totalGeneral)}</span></div>
+    </div>`;
+    
+    lista.forEach(d => {
+      html += `<div class="card" style="margin-bottom:8px;cursor:pointer" onclick="document.getElementById('modal-deudores').classList.remove('open');abrirPerfil('${normNom(d.nombre)}')">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">${iniciales(d.nombre)}</div>
+          <div style="flex:1"><div style="font-size:14px;font-weight:600">${d.nombre}</div><div style="font-size:11px;color:var(--text2)">${d.pedidos.length} pedido${d.pedidos.length!==1?'s':''} pendiente${d.pedidos.length!==1?'s':''}</div></div>
+          <div style="text-align:right"><div style="font-size:15px;font-weight:700;color:var(--red)">${fmtM(d.total)}</div></div>
+        </div>
+      </div>`;
+    });
+    q('deudores-body').innerHTML = html;
+  }
+  
+  q('modal-deudores').classList.add('open');
+}
 
+// Cerrar modal de deudores al tocar fuera
+q('modal-deudores').addEventListener('click', function(e){
+  if(e.target === this) this.classList.remove('open');
+});
 // ============ INIT ============
 async function iniciar(){
   const txt = document.querySelector('.loading-txt');
