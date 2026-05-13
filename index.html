@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -100,6 +101,7 @@ textarea{resize:vertical;min-height:80px}
 .btn-outline{padding:8px 14px;border-radius:var(--radius-sm);background:transparent;color:var(--text);border:1px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
 .btn-red{background:var(--red);color:#fff;border:none;padding:8px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
 .btn-green{background:var(--green);color:#fff;border:none;padding:8px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-whatsapp{background:#25D366;color:#fff;border:none;padding:8px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
 
 .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .extra-btn{padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left;transition:all .15s}
@@ -190,6 +192,29 @@ textarea{resize:vertical;min-height:80px}
   <div class="content">
     <div class="pane active" id="p-hoy">
       <div id="aviso-hoy" class="aviso" style="display:none"><strong>☀️ Buenos días</strong><p id="aviso-txt"></p></div>
+      
+      <!-- DASHBOARD DE GANANCIAS -->
+      <div class="card" style="margin-bottom:12px;background:var(--text);color:#fff;border:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.5px">📊 Finanzas del mes</span>
+          <span style="font-size:10px;opacity:.7" id="mes-actual-dash"></span>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:8px">
+          <span style="font-size:28px;font-weight:700" id="dash-facturado">$0</span>
+          <span style="font-size:12px;opacity:.7;margin-bottom:4px">facturado</span>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:10px">
+          <div style="flex:1;background:rgba(255,255,255,.1);border-radius:8px;padding:8px">
+            <div style="font-size:9px;opacity:.7">COBRADO</div>
+            <div style="font-size:15px;font-weight:600" id="dash-cobrado">$0</div>
+          </div>
+          <div style="flex:1;background:rgba(255,255,255,.1);border-radius:8px;padding:8px">
+            <div style="font-size:9px;opacity:.7">PENDIENTE</div>
+            <div style="font-size:15px;font-weight:600;color:#fca5a5" id="dash-pendiente">$0</div>
+          </div>
+        </div>
+      </div>
+
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-label">Citas hoy</div><div class="stat-num" id="s-citas">0</div></div>
         <div class="stat-card"><div class="stat-label">Entregas hoy</div><div class="stat-num" id="s-ent">0</div></div>
@@ -211,7 +236,17 @@ textarea{resize:vertical;min-height:80px}
 
     <div class="pane" id="p-clientes">
       <div id="vista-lista-clientes">
-        <input type="search" id="busca-cliente" placeholder="Buscar cliente..." style="margin-bottom:12px" oninput="renderClientes()">
+        <input type="search" id="busca-cliente" placeholder="Buscar por nombre, material..." style="margin-bottom:8px" oninput="renderClientes()">
+        <div class="row2" style="margin-bottom:8px">
+          <input type="date" id="filtro-fecha" onchange="renderClientes()" placeholder="Fecha">
+          <select id="filtro-estado" onchange="renderClientes()" style="padding:10px">
+            <option value="">Todos los estados</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="confirmada">Confirmada</option>
+            <option value="entregado">Entregado</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
         <div class="filter-row">
           <button class="filt active" onclick="filtCl('todos',this)">Todos</button>
           <button class="filt" onclick="filtCl('debe',this)">Con saldo</button>
@@ -278,16 +313,7 @@ textarea{resize:vertical;min-height:80px}
 </nav>
 
 <div class="modal-overlay" id="modal-editar"><div class="modal"><div class="modal-handle"></div><div class="modal-title" id="modal-title"></div><div id="modal-body"></div></div></div>
-
-<div class="modal-overlay" id="modal-deudores">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">💰 Clientes con saldo pendiente</div>
-    <div id="deudores-body"></div>
-    <button class="btn-outline" style="width:100%;margin-top:12px" onclick="document.getElementById('modal-deudores').classList.remove('open')">Cerrar</button>
-  </div>
-</div>
-
+<div class="modal-overlay" id="modal-deudores"><div class="modal"><div class="modal-handle"></div><div class="modal-title">💰 Clientes con saldo pendiente</div><div id="deudores-body"></div><button class="btn-outline" style="width:100%;margin-top:12px" onclick="document.getElementById('modal-deudores').classList.remove('open')">Cerrar</button></div></div>
 <div id="pdf-preview"></div>
 
 <script type="module">
@@ -361,7 +387,7 @@ window.selTipo = function(t,el){
   q('bloque-pedido').style.display = t==='pedido'?'block':'none';
 }
 
-// ============ HOY ============
+// ============ HOY con Dashboard ============
 function renderHoy(){
   const data = getData(), h = hoy();
   const citas = data.filter(x=>x.tipo==='cita'&&x.fecha===h&&x.estado!=='cancelado');
@@ -369,12 +395,21 @@ function renderHoy(){
   const mesActual = mesStr(new Date());
   const delMes = data.filter(x=>x.tipo==='pedido'&&(x.fventa||'').startsWith(mesActual));
   const genMes = delMes.reduce((a,x)=>a+(Number(x.total)||0),0);
+  const cobrado = delMes.reduce((a,x)=>a+(Number(x.ab1)||0)+(Number(x.ab2)||0),0);
+  const pendiente = genMes - cobrado;
   const porCobrar = data.filter(x=>x.tipo==='pedido'&&x.estado==='pendiente').reduce((a,x)=>a+saldo(x),0);
 
+  // Stats
   q('s-citas').textContent = citas.length;
   q('s-ent').textContent = entregas.length;
   q('s-mes').textContent = '$'+Math.round(genMes).toLocaleString('es-CL');
   q('s-cobrar').textContent = '$'+Math.round(porCobrar).toLocaleString('es-CL');
+  
+  // Dashboard
+  q('mes-actual-dash').textContent = new Date().toLocaleDateString('es-CL',{month:'long',year:'numeric'});
+  q('dash-facturado').textContent = '$'+Math.round(genMes).toLocaleString('es-CL');
+  q('dash-cobrado').textContent = '$'+Math.round(cobrado).toLocaleString('es-CL');
+  q('dash-pendiente').textContent = '$'+Math.round(pendiente).toLocaleString('es-CL');
 
   const deHoy = [...citas,...entregas].sort((a,b)=>((a.hora||a.hentrega||'')>(b.hora||b.hentrega||''))?1:-1);
   q('lista-hoy').innerHTML = deHoy.length===0 ? '<div class="empty"><div class="empty-icon">🌙</div><p>Sin actividad para hoy</p></div>' : deHoy.map(miniCard).join('');
@@ -460,7 +495,7 @@ function renderCal(){
 }
 window.selDiaCal = function(fs){ calSelDia = calSelDia===fs ? null : fs; renderCal(); }
 
-// ============ CLIENTES ============
+// ============ CLIENTES con búsqueda avanzada ============
 function getClientes(){
   const map = {};
   getData().forEach(x=>{
@@ -483,13 +518,42 @@ function renderClientes(){
   if(perfilActivo){ renderPerfil(perfilActivo); return; }
   q('vista-lista-clientes').style.display = 'block';
   q('vista-perfil').style.display = 'none';
+  
   const busca = (qv('busca-cliente')||'').toLowerCase();
-  let clientes = getClientes().filter(c=>c.nombre.toLowerCase().includes(busca));
+  const filtroFecha = q('filtro-fecha')?.value || '';
+  const filtroEstado = q('filtro-estado')?.value || '';
+  
+  let clientes = getClientes();
+  
+  // Búsqueda avanzada
+  if(busca){
+    clientes = clientes.filter(c=>{
+      if(c.nombre.toLowerCase().includes(busca)) return true;
+      if(c.tel.toLowerCase().includes(busca)) return true;
+      return c.registros.some(x=>{
+        if((x.piedra||'').toLowerCase().includes(busca)) return true;
+        if((x.melamina||'').toLowerCase().includes(busca)) return true;
+        if((x.formaPago||'').toLowerCase().includes(busca)) return true;
+        return false;
+      });
+    });
+  }
+  
+  if(filtroEstado){
+    clientes = clientes.filter(c=>c.registros.some(x=>x.estado===filtroEstado));
+  }
+  
+  if(filtroFecha){
+    clientes = clientes.filter(c=>c.registros.some(x=>{
+      return (x.fecha===filtroFecha) || (x.fentrega===filtroFecha) || (x.fventa===filtroFecha);
+    }));
+  }
+  
   if(filtroClientes==='debe') clientes = clientes.filter(c=>c.registros.some(x=>x.tipo==='pedido'&&saldo(x)>0&&x.estado!=='cancelado'));
   if(filtroClientes==='pagado') clientes = clientes.filter(c=>c.registros.some(x=>x.tipo==='pedido'&&saldo(x)<=0&&x.estado!=='cancelado'));
   clientes.sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
 
-  if(!clientes.length){ q('lista-clientes').innerHTML = '<div class="empty"><div class="empty-icon">👤</div><p>Sin clientes</p></div>'; return; }
+  if(!clientes.length){ q('lista-clientes').innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><p>Sin resultados</p></div>'; return; }
 
   q('lista-clientes').innerHTML = clientes.map(c=>{
     const pedidos = c.registros.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado');
@@ -524,11 +588,20 @@ function renderPerfil(k){
   const totalSaldo = pedidos.reduce((a,x)=>a+saldo(x),0);
   const sorted = [...c.registros].sort((a,b)=>(a.tipo==='cita'?a.fecha:a.fentrega||'')>(b.tipo==='cita'?b.fecha:b.fentrega||'')?1:-1);
 
+  // Armar texto para WhatsApp
+  let waText = `Hola ${c.nombre}, aquí tu resumen con FigAnzi:%0A%0A`;
+  pedidos.forEach((x,i)=>{
+    waText += `📦 Pedido ${i+1}: ${fmtM(x.total)} | Saldo: ${fmtM(saldo(x))}%0A`;
+  });
+  waText += `%0ATotal: ${fmtM(totalFacturado)} | Saldo: ${fmtM(totalSaldo)}`;
+  const waLink = `https://wa.me/${(c.tel||'').replace(/[^0-9]/g,'')}?text=${waText}`;
+
   let html = `<div class="perfil-back" onclick="volverClientes()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>Volver a clientes</div>
   <div style="background:var(--text);border-radius:var(--radius);padding:20px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:14px">
       <div style="width:60px;height:60px;border-radius:50%;background:#e87060;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;font-family:'DM Serif Display',serif">${iniciales(c.nombre)}</div>
-      <div><div style="font-family:'DM Serif Display',serif;font-size:22px;color:#fff">${c.nombre}</div>${c.tel?`<div style="font-size:13px;color:rgba(255,255,255,.65)">📞 ${c.tel}</div>`:''}</div>
+      <div style="flex:1"><div style="font-family:'DM Serif Display',serif;font-size:22px;color:#fff">${c.nombre}</div>${c.tel?`<div style="font-size:13px;color:rgba(255,255,255,.65)">📞 ${c.tel}</div>`:''}</div>
+      ${c.tel?`<a href="${waLink}" target="_blank" style="background:#25D366;color:#fff;border:none;padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;text-decoration:none;flex-shrink:0">💬 WhatsApp</a>`:''}
     </div>
   </div>`;
 
