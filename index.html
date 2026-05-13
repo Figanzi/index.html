@@ -311,7 +311,7 @@ function getData() { return _cache; }
 
 function setSyncStatus(s) {
   const d = document.getElementById('sync-dot');
-  if (!d) return;
+  if(!d) return;
   d.className = 'sync-dot' + (s === 'syncing' ? ' syncing' : s === 'error' ? ' error' : '');
   d.title = s === 'ok' ? 'Conectado' : s === 'syncing' ? 'Guardando...' : 'Error';
 }
@@ -325,7 +325,7 @@ async function cargarDatos() {
 async function saveData(docId, datos) {
   setSyncStatus('syncing');
   if (docId) {
-    const { error } = await supabase.from('registros').update({ datos }).eq('id', docId);
+    const { error } = await supabase.from('registros').update({ datos }).eq('id', Number(docId));
     if (error) throw error;
   } else {
     const { data, error } = await supabase.from('registros').insert({ datos }).select('id').single();
@@ -339,10 +339,26 @@ async function saveData(docId, datos) {
 
 async function deleteData(docId) {
   setSyncStatus('syncing');
-  const { error } = await supabase.from('registros').delete().eq('id', docId);
+  const { error } = await supabase.from('registros').delete().eq('id', Number(docId));
   if (error) throw error;
   await cargarDatos();
   setSyncStatus('ok');
+}
+
+async function iniciar() {
+  const txt = document.getElementById('loading-overlay').querySelector('.loading-txt');
+  try {
+    txt.textContent = 'Conectando...';
+    await cargarDatos();
+    document.getElementById('loading-overlay').classList.add('hidden');
+    setSyncStatus('ok');
+    renderHoy();
+    actualizarDatalist();
+  } catch(e) {
+    console.error(e);
+    txt.textContent = 'Error: ' + e.message;
+    setSyncStatus('error');
+  }
 }
 
 // ============ UTILS ============
@@ -354,13 +370,13 @@ function saldo(x){return(Number(x.total)||0)-(Number(x.ab1)||0)-(Number(x.ab2)||
 function mesStr(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
 function nombreMes(d){return d.toLocaleDateString('es-CL',{month:'long',year:'numeric'})}
 
-// ============ ESTADO ============
 let tipoActual='cita';
 let filtroClientes='todos';
 let calFecha=new Date();
 let calSelDia=null;
 let perfilActivo=null;
 
+// ============ NAVEGACIÓN ============
 window.go = function(p){
   document.querySelectorAll('.pane').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
@@ -372,6 +388,7 @@ window.go = function(p){
   if(p==='nuevo') actualizarDatalist();
 }
 
+// ============ TIPO SELECTOR ============
 window.selTipo = function(t,el){
   tipoActual=t;
   document.querySelectorAll('.tipo-btn').forEach(b=>b.classList.remove('sel'));
@@ -380,6 +397,7 @@ window.selTipo = function(t,el){
   document.getElementById('bloque-pedido').style.display=t==='pedido'?'block':'none';
 }
 
+// ============ HOY ============
 function renderHoy(){
   const data=getData(), h=hoy();
   const citas=data.filter(x=>x.tipo==='cita'&&x.fecha===h&&x.estado!=='cancelado');
@@ -445,6 +463,7 @@ window.cambiarEstado = async function(id, est){
   try { await saveData(id, {estado: est}); } catch(e) { alert('Error al guardar.'); }
 }
 
+// ============ CALENDARIO ============
 window.calNav = function(dir){
   calFecha=new Date(calFecha.getFullYear(),calFecha.getMonth()+dir,1);
   calSelDia=null;
@@ -492,6 +511,7 @@ function renderCal(){
 
 window.selDiaCal = function(fs){calSelDia=calSelDia===fs?null:fs;renderCal();}
 
+// ============ CLIENTES ============
 function normNom(n){return n.trim().toLowerCase()}
 
 function getClientes(){
@@ -537,7 +557,6 @@ function renderClientes(){
     return`<div class="cliente-card" onclick="abrirPerfil('${normNom(c.nombre)}')">
       <div class="cliente-head"><div class="cliente-avatar">${iniciales(c.nombre)}</div><div class="cliente-info"><h3>${c.nombre}</h3><p>${c.tel||'Sin teléfono'}</p></div></div>
       <div class="cliente-meta"><span class="badge pend">${nCitas} cita${nCitas!==1?'s':''}</span><span class="badge conf">${nPed} pedido${nPed!==1?'s':''}</span>${pagoStatus?`<span class="badge ${pagoStatus}">${totalSaldo<=0&&totalFacturado>0?'Pagado al día':'Saldo pendiente'}</span>`:''}</div>
-      ${totalFacturado>0?`<div class="money-row"><span class="money-pill mp-total">Total ${fmtM(totalFacturado)}</span>${totalSaldo>0?`<span class="money-pill mp-saldo">Saldo ${fmtM(totalSaldo)}</span>`:''}${totalSaldo<=0?`<span class="money-pill mp-ok">Pagado</span>`:''}</div>`:''}
     </div>`;
   }).join('');
 }
@@ -546,11 +565,12 @@ window.abrirPerfil = function(k){
   perfilActivo=k;
   document.getElementById('vista-lista-clientes').style.display='none';
   document.getElementById('vista-perfil').style.display='block';
+  document.getElementById('n-clientes').classList.add('active');
+  renderPerfil(k);
   document.querySelectorAll('.pane').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
   document.getElementById('p-clientes').classList.add('active');
   document.getElementById('n-clientes').classList.add('active');
-  renderPerfil(k);
 }
 
 function renderPerfil(k){
@@ -558,115 +578,49 @@ function renderPerfil(k){
   const c=clientes.find(x=>normNom(x.nombre)===k);
   if(!c){perfilActivo=null;renderClientes();return;}
   const pedidos=c.registros.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado');
-  const citas=c.registros.filter(x=>x.tipo==='cita');
   const totalFacturado=pedidos.reduce((a,x)=>a+(Number(x.total)||0),0);
-  const totalAbonado=pedidos.reduce((a,x)=>a+(Number(x.ab1)||0)+(Number(x.ab2)||0),0);
   const totalSaldo=pedidos.reduce((a,x)=>a+saldo(x),0);
-  const sorted=[...c.registros].sort((a,b)=>{const fa=a.tipo==='cita'?a.fecha:a.fentrega||a.fventa||'';const fb=b.tipo==='cita'?b.fecha:b.fentrega||b.fventa||'';return fa<fb?1:-1;});
-  const ultimaDir=c.dir||([...c.registros].reverse().find(x=>x.dir2||x.dir)||{}).dir2||([...c.registros].reverse().find(x=>x.dir)||{}).dir||'';
-
-  let html=`
-  <div class="perfil-back" onclick="volverClientes()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Volver a clientes</div>
-  <div style="background:var(--text);border-radius:var(--radius);padding:20px;margin-bottom:12px;position:relative;overflow:hidden">
-    <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.05)"></div>
-    <div style="position:absolute;bottom:-30px;right:20px;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.04)"></div>
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
-      <div style="width:60px;height:60px;border-radius:50%;background:#e87060;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0;font-family:'DM Serif Display',serif">${iniciales(c.nombre)}</div>
-      <div><div style="font-family:'DM Serif Display',serif;font-size:22px;color:#fff;line-height:1.1">${c.nombre}</div>${c.tel?`<a href="tel:${c.tel}" style="font-size:13px;color:rgba(255,255,255,.65);text-decoration:none;margin-top:3px;display:block">📞 ${c.tel}</a>`:'<div style="font-size:13px;color:rgba(255,255,255,.4);margin-top:3px">Sin teléfono</div>'}${ultimaDir?`<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">📍 ${ultimaDir}</div>`:''}</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-      <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:#fff">${citas.length}</div><div style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">Citas</div></div>
-      <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:#fff">${pedidos.length}</div><div style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">Pedidos</div></div>
-      <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:${totalSaldo<=0&&totalFacturado>0?'#6ee7b7':totalSaldo>0?'#fca5a5':'#fff'}">${totalSaldo<=0&&totalFacturado>0?'✓':totalSaldo>0?'!':'—'}</div><div style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">Pago</div></div>
-    </div>
-  </div>`;
-
+  let html=`<div class="perfil-back" onclick="volverClientes()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>Volver a clientes</div>
+  <div style="background:var(--text);border-radius:var(--radius);padding:20px;margin-bottom:12px"><div style="display:flex;align-items:center;gap:14px"><div style="width:60px;height:60px;border-radius:50%;background:#e87060;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;font-family:'DM Serif Display',serif">${iniciales(c.nombre)}</div><div><div style="font-family:'DM Serif Display',serif;font-size:22px;color:#fff">${c.nombre}</div>${c.tel?`<div style="font-size:13px;color:rgba(255,255,255,.65);margin-top:3px">📞 ${c.tel}</div>`:''}</div></div></div>`;
+  
   if(totalFacturado>0){
-    html+=`<div class="card" style="margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div class="sec-title" style="margin:0">💰 Resumen financiero</div><button class="btn-outline" style="font-size:11px;padding:5px 10px" onclick="descargarPDF('${k}')">📄 PDF</button></div>
-    <div class="info-row"><span class="info-label">Total facturado</span><span class="info-val" style="font-weight:700;font-size:15px;color:var(--blue)">${fmtM(totalFacturado)}</span></div>
-    <div class="info-row"><span class="info-label">Total abonado</span><span class="info-val" style="color:var(--amber);font-weight:600">${fmtM(totalAbonado)}</span></div>
-    <div class="info-row" style="border-bottom:none"><span class="info-label">Saldo pendiente</span><span class="info-val" style="font-weight:700;font-size:15px;color:${totalSaldo<=0?'var(--green)':'var(--red)'}">${totalSaldo<=0?'✓ Pagado al día':fmtM(totalSaldo)}</span></div></div>`;
+    html+=`<div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:600">Total facturado</span><span style="color:var(--blue);font-weight:700">${fmtM(totalFacturado)}</span></div><div style="display:flex;justify-content:space-between"><span style="font-weight:600">Saldo pendiente</span><span style="color:${totalSaldo<=0?'var(--green)':'var(--red)'};font-weight:700">${totalSaldo<=0?'✓ Pagado al día':fmtM(totalSaldo)}</span></div></div>`;
   }
-
-  html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 8px"><div class="sec-title" style="margin:0">📋 Historial</div></div>`;
+  
+  html+=`<div class="sec-title">Historial</div>`;
+  const sorted=[...c.registros].sort((a,b)=>{const fa=a.tipo==='cita'?a.fecha:a.fentrega||'';const fb=b.tipo==='cita'?b.fecha:b.fentrega||'';return fa<fb?1:-1;});
   html+=sorted.map(x=>{
     const esCita=x.tipo==='cita';
-    const fecha=esCita?x.fecha:x.fentrega||x.fventa||'';
+    const fecha=esCita?x.fecha:x.fentrega||'';
     const lbl={pendiente:'Pendiente',confirmada:'Confirmada',entregado:'Entregado',cancelado:'Cancelado'};
     const bc={pendiente:'pend',confirmada:'conf',entregado:'ent',cancelado:'canc'}[x.estado]||'pend';
-    return`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">${esCita?'📅':'📦'}</span><div><div style="font-size:13px;font-weight:600">${esCita?'Cita':'Pedido'}</div><div style="font-size:11px;color:var(--text3)">${fmt(fecha)||'Sin fecha'}${(esCita?x.hora:x.hentrega)?' · '+(esCita?x.hora:x.hentrega)+'h':''}</div></div></div><span class="badge ${bc}">${lbl[x.estado]}</span></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><button class="btn-outline" style="font-size:11px;padding:4px 8px" onclick="abrirEditar('${x.id}')">✏️ Editar</button>${x.estado==='pendiente'&&esCita?`<button class="btn-green" style="font-size:11px;padding:4px 8px" onclick="cambiarEstado('${x.id}','confirmada')">✓ Confirmar</button>`:''}${x.estado!=='cancelado'&&x.estado!=='entregado'?`<button class="btn-red" style="font-size:11px;padding:4px 8px" onclick="cambiarEstado('${x.id}','cancelado')">Cancelar</button>`:''}</div></div>`;
+    return`<div class="card-sm"><div style="display:flex;justify-content:space-between;align-items:center"><div><span style="font-weight:600">${esCita?'📅 Cita':'📦 Pedido'}</span><span style="font-size:11px;color:var(--text2);margin-left:8px">${fmt(fecha)}</span></div><span class="badge ${bc}">${lbl[x.estado]}</span></div></div>`;
   }).join('');
-  if(c.registros.length===0) html+='<div class="empty"><p>Sin registros aún</p></div>';
+  
   document.getElementById('vista-perfil').innerHTML=html;
-  document.getElementById('vista-perfil').scrollTop=0;
 }
 
 window.volverClientes = function(){perfilActivo=null;renderClientes();}
 
-window.descargarPDF = function(k){
-  const clientes=getClientes();
-  const c=clientes.find(x=>normNom(x.nombre)===k);
-  if(!c) return;
-  const pedidos=c.registros.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado');
-  const totalFacturado=pedidos.reduce((a,x)=>a+(Number(x.total)||0),0);
-  const totalAb1=pedidos.reduce((a,x)=>a+(Number(x.ab1)||0),0);
-  const totalAb2=pedidos.reduce((a,x)=>a+(Number(x.ab2)||0),0);
-  const totalSaldo=pedidos.reduce((a,x)=>a+saldo(x),0);
-  const el=document.getElementById('pdf-preview');
-  const fechaHoy=new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
-  let pedHtml='';
-  pedidos.forEach((x,i)=>{
-    const extras=['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'].filter(ek=>x['x_'+ek]).join(', ');
-    pedHtml+=`<tr><td>${i+1}</td><td>${fmt(x.fventa)||'—'}</td><td>${fmt(x.fentrega)||'—'}</td><td>${x.piedra||'—'}</td><td>${x.melamina||'—'}</td><td>${extras||'—'}</td><td style="text-align:right">${fmtM(x.total)||'—'}</td><td style="text-align:right">${fmtM(x.ab1)||'—'}</td><td style="text-align:right">${fmtM(x.ab2)||'—'}</td><td style="text-align:right;font-weight:600;color:${saldo(x)<=0?'#1a6b4a':'#c0392b'}">${saldo(x)<=0?'Pagado':fmtM(saldo(x))}</td></tr>`;
-  });
-  el.innerHTML=`<div class="pdf-logo"><span>Fig</span>Anzi.</div><div style="font-size:11px;color:#999;margin-bottom:16px">Penco, Biobío · ${fechaHoy}</div><h2 style="font-size:16px;margin-bottom:6px">Ficha: ${c.nombre}</h2>
-  ${pedidos.length>0?`<div class="pdf-section"><h3>Pedidos</h3><table><thead><tr><th>#</th><th>F. Venta</th><th>F. Entrega</th><th>Piedra</th><th>Melamina</th><th>Extras</th><th>Total</th><th>Ab1</th><th>Ab2</th><th>Saldo</th></tr></thead><tbody>${pedHtml}</tbody><tfoot><tr class="total-row"><td colspan="6">TOTALES</td><td>${fmtM(totalFacturado)}</td><td>${fmtM(totalAb1)}</td><td>${fmtM(totalAb2)}</td><td style="color:${totalSaldo<=0?'#1a6b4a':'#c0392b'}">${totalSaldo<=0?'PAGADO':fmtM(totalSaldo)}</td></tr></tfoot></table></div>`:''}
-  <div class="disclaimer">Documento interno FigAnzi. No representa factura formal.</div>`;
-  el.style.display='block';
-  window.print();
-  setTimeout(()=>{el.style.display='none';},1000);
-}
-
+// ============ EDITAR ============
 window.abrirEditar = function(id){
   const x=getData().find(d=>d.id===id);
   if(!x) return;
-  const esCita=x.tipo==='cita';
-  document.getElementById('modal-title').textContent=esCita?'Editar cita':'Editar pedido';
-  let html=`<div class="form-section"><label>Nombre</label><input type="text" id="e-nom" value="${x.nombre||''}"></div>
-  <div class="row2"><div class="form-section"><label>Teléfono</label><input type="tel" id="e-tel" value="${x.tel||x.telefono||''}"></div><div class="form-section"><label>Dirección</label><input type="text" id="e-dir" value="${x.dir||''}"></div></div>`;
-  if(esCita){
-    html+=`<div class="row2"><div class="form-section"><label>Fecha</label><input type="date" id="e-fecha" value="${x.fecha||''}"></div><div class="form-section"><label>Hora</label><input type="time" id="e-hora" value="${x.hora||''}"></div></div>
-    <div class="form-section"><label>Lugar</label><input type="text" id="e-lcita" value="${x.lcita||''}"></div>
-    <div class="form-section"><label>Qué quiere</label><textarea id="e-qcita">${x.qcita||''}</textarea></div>
-    <div class="form-section"><label>Cotización ($)</label><input type="number" id="e-pcita" value="${x.pcita||''}"></div>
-    <div class="form-section"><label>Notas</label><textarea id="e-ncita">${x.ncita||''}</textarea></div>
-    <div class="form-section"><label>Estado</label><select id="e-estado"><option value="pendiente" ${x.estado==='pendiente'?'selected':''}>Pendiente</option><option value="confirmada" ${x.estado==='confirmada'?'selected':''}>Confirmada</option><option value="cancelado" ${x.estado==='cancelado'?'selected':''}>Cancelado</option></select></div>`;
-  } else {
-    html+=`<div class="row2"><div class="form-section"><label>Fecha venta</label><input type="date" id="e-fventa" value="${x.fventa||''}"></div><div class="form-section"><label>Fecha entrega</label><input type="date" id="e-fentrega" value="${x.fentrega||''}"></div></div>
-    <div class="form-section"><label>Total ($)</label><input type="number" id="e-total" value="${x.total||''}"></div>
-    <div class="row2"><div class="form-section"><label>Abono 1 ($)</label><input type="number" id="e-ab1" value="${x.ab1||''}"></div><div class="form-section"><label>Abono 2 ($)</label><input type="number" id="e-ab2" value="${x.ab2||''}"></div></div>
-    <div class="form-section"><label>Notas</label><textarea id="e-nped">${x.nped||''}</textarea></div>
-    <div class="form-section"><label>Estado</label><select id="e-estado"><option value="pendiente" ${x.estado==='pendiente'?'selected':''}>Pendiente</option><option value="entregado" ${x.estado==='entregado'?'selected':''}>Entregado</option><option value="cancelado" ${x.estado==='cancelado'?'selected':''}>Cancelado</option></select></div>`;
-  }
-  html+=`<div class="btn-row"><button class="btn-main" onclick="guardarEdicion('${id}','${x.tipo}')">Guardar</button><button class="btn-outline" onclick="cerrarModal()">Cancelar</button></div>`;
+  document.getElementById('modal-title').textContent=x.tipo==='cita'?'Editar cita':'Editar pedido';
+  let html=`<div class="form-section"><label>Nombre</label><input type="text" id="e-nom" value="${x.nombre||''}"></div><div class="form-section"><label>Estado</label><select id="e-estado"><option value="pendiente" ${x.estado==='pendiente'?'selected':''}>Pendiente</option><option value="confirmada" ${x.estado==='confirmada'?'selected':''}>Confirmada</option><option value="entregado" ${x.estado==='entregado'?'selected':''}>Entregado</option><option value="cancelado" ${x.estado==='cancelado'?'selected':''}>Cancelado</option></select></div><div class="btn-row"><button class="btn-main" onclick="guardarEdicion('${id}')">Guardar</button><button class="btn-outline" onclick="cerrarModal()">Cancelar</button></div>`;
   document.getElementById('modal-body').innerHTML=html;
   document.getElementById('modal-editar').classList.add('open');
 }
 
-window.guardarEdicion = async function(id, tipo){
-  const esCita=tipo==='cita';
-  const datos={nombre: document.getElementById('e-nom').value.trim(), tel: document.getElementById('e-tel').value.trim(), dir: document.getElementById('e-dir').value.trim(), estado: document.getElementById('e-estado').value};
-  if(esCita){
-    Object.assign(datos,{fecha: document.getElementById('e-fecha').value, hora: document.getElementById('e-hora').value, lcita: document.getElementById('e-lcita').value.trim(), qcita: document.getElementById('e-qcita').value.trim(), pcita: document.getElementById('e-pcita').value||null, ncita: document.getElementById('e-ncita').value.trim()});
-  } else {
-    Object.assign(datos,{fventa: document.getElementById('e-fventa').value, fentrega: document.getElementById('e-fentrega').value, total: document.getElementById('e-total').value||null, ab1: document.getElementById('e-ab1').value||null, ab2: document.getElementById('e-ab2').value||null, nped: document.getElementById('e-nped').value.trim()});
-  }
+window.guardarEdicion = async function(id){
+  const datos={nombre: document.getElementById('e-nom').value.trim(), estado: document.getElementById('e-estado').value};
   try { await saveData(id, datos); cerrarModal(); } catch(e) { alert('Error al guardar.'); }
 }
 
 window.cerrarModal = function(){document.getElementById('modal-editar').classList.remove('open');}
 document.getElementById('modal-editar').addEventListener('click',function(e){if(e.target===this) cerrarModal();});
 
+// ============ GUARDAR NUEVO ============
 function actualizarDatalist(){
   const clientes=getClientes();
   document.getElementById('clientes-list').innerHTML=clientes.map(c=>`<option value="${c.nombre}">`).join('');
@@ -679,40 +633,21 @@ window.guardar = async function(){
   if(tipoActual==='cita'){
     const fecha=document.getElementById('f-fcita').value;
     if(!fecha){alert('Selecciona la fecha de la cita.');return;}
-    Object.assign(base,{fecha, hora: document.getElementById('f-hcita').value, lcita: document.getElementById('f-lcita').value.trim(), qcita: document.getElementById('f-qcita').value.trim(), pcita: document.getElementById('f-pcita').value||null, piedraC: document.getElementById('f-piedra-c').value.trim(), ncita: document.getElementById('f-ncita').value.trim()});
+    Object.assign(base,{fecha, hora: document.getElementById('f-hcita').value, lcita: document.getElementById('f-lcita').value.trim(), qcita: document.getElementById('f-qcita').value.trim(), pcita: document.getElementById('f-pcita').value||null});
   } else {
     const fe=document.getElementById('f-fentrega').value;
     if(!fe){alert('Selecciona la propuesta de entrega.');return;}
-    const extras={};
-    ['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'].forEach(ek=>{extras['x_'+ek]=document.getElementById('x-'+ek).checked;});
-    Object.assign(base,{fventa: document.getElementById('f-fventa').value, fentrega: fe, hentrega: document.getElementById('f-hentrega').value, dir2: document.getElementById('f-dir2').value.trim(), piedra: document.getElementById('f-piedra').value, melamina: document.getElementById('f-melamina').value.trim(), croquis: document.getElementById('f-croquis').value.trim(), total: document.getElementById('f-total').value||null, ab1: document.getElementById('f-ab1').value||null, ab2: document.getElementById('f-ab2').value||null, formaPago: document.getElementById('f-pago').value, nped: document.getElementById('f-nped').value.trim(), ...extras});
+    Object.assign(base,{fventa: document.getElementById('f-fventa').value, fentrega: fe, total: document.getElementById('f-total').value||null, ab1: document.getElementById('f-ab1').value||null, ab2: document.getElementById('f-ab2').value||null});
   }
   try {
     await saveData(null, base);
     document.querySelectorAll('#p-nuevo input:not([type=checkbox])').forEach(el=>{if(el.type==='time') el.value='10:00';else el.value='';});
     document.querySelectorAll('#p-nuevo textarea').forEach(el=>el.value='');
-    document.querySelectorAll('#p-nuevo select').forEach(el=>el.value='');
-    document.querySelectorAll('#p-nuevo input[type=checkbox]').forEach(el=>el.checked=false);
     go('hoy');
-  } catch(e) { alert('Error al guardar.'); }
+  } catch(e) { alert('Error al guardar: ' + e.message); }
 }
 
-async function iniciar(){
-  const txt=document.getElementById('loading-overlay').querySelector('.loading-txt');
-  try {
-    txt.textContent='Conectando con Supabase...';
-    await cargarDatos();
-    document.getElementById('loading-overlay').classList.add('hidden');
-    setSyncStatus('ok');
-    renderHoy();
-    actualizarDatalist();
-  } catch(e){
-    console.error(e);
-    txt.textContent='Error: '+(e.message||'Revisa conexión');
-    setSyncStatus('error');
-  }
-}
-
+// ============ INIT ============
 const ahora=new Date();
 document.getElementById('h-fecha').textContent=ahora.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
 document.getElementById('h-mes').textContent=ahora.toLocaleDateString('es-CL',{month:'long',year:'numeric'}).replace(/^\w/,c=>c.toUpperCase());
