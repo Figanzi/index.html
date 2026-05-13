@@ -621,35 +621,67 @@ window.descargarPDF = function(k){
 }
 
 // ============ EDITAR COMPLETO ============
-window.abrirEditar = function(id){
-  const x=getData().find(d=>d.id===id);
-  if(!x) return;
-  const esCita=x.tipo==='cita';
-  document.getElementById('modal-title').textContent=esCita?'✏️ Editar cita':'✏️ Editar pedido';
-
-  let html=`<div class="form-section"><label>Nombre</label><input type="text" id="e-nom" value="${x.nombre||''}"></div>
-  <div class="row2"><div class="form-section"><label>Teléfono</label><input type="tel" id="e-tel" value="${x.tel||x.telefono||''}"></div><div class="form-section"><label>Dirección</label><input type="text" id="e-dir" value="${x.dir||''}"></div></div>`;
-
-  if(esCita){
-    html+=`<div class="row2"><div class="form-section"><label>Fecha</label><input type="date" id="e-fecha" value="${x.fecha||''}"></div><div class="form-section"><label>Hora</label><input type="time" id="e-hora" value="${x.hora||''}"></div></div>
-    <div class="form-section"><label>Lugar</label><input type="text" id="e-lcita" value="${x.lcita||''}"></div>
-    <div class="form-section"><label>Qué quiere</label><textarea id="e-qcita">${x.qcita||''}</textarea></div>
-    <div class="row2"><div class="form-section"><label>Cotización ($)</label><input type="number" id="e-pcita" value="${x.pcita||''}"></div><div class="form-section"><label>Tipo piedra</label><input type="text" id="e-piedraC" value="${x.piedraC||''}"></div></div>
-    <div class="form-section"><label>Notas</label><textarea id="e-ncita">${x.ncita||''}</textarea></div>
-    <div class="form-section"><label>Estado</label><select id="e-estado"><option value="pendiente" ${x.estado==='pendiente'?'selected':''}>Pendiente</option><option value="confirmada" ${x.estado==='confirmada'?'selected':''}>Confirmada</option><option value="cancelado" ${x.estado==='cancelado'?'selected':''}>Cancelado</option></select></div>`;
+window.guardar = async function(){
+  const nom = document.getElementById('f-nom').value.trim();
+  if(!nom){ alert('Ingresa el nombre del cliente.'); return; }
+  
+  const base = {
+    nombre: nom, 
+    tel: document.getElementById('f-tel').value.trim(), 
+    dir: document.getElementById('f-dir').value.trim(), 
+    tipo: tipoActual, 
+    estado: 'pendiente' 
+  };
+  
+  if(tipoActual === 'cita'){
+    const fecha = document.getElementById('f-fcita').value;
+    if(!fecha){ alert('Selecciona la fecha de la cita.'); return; }
+    base.fecha = fecha;
+    base.hora = document.getElementById('f-hcita').value || '';
+    base.lcita = document.getElementById('f-lcita').value.trim() || '';
+    base.qcita = document.getElementById('f-qcita').value.trim() || '';
+    base.pcita = document.getElementById('f-pcita').value || null;
+    base.piedraC = document.getElementById('f-piedra-c').value.trim() || '';
+    base.ncita = document.getElementById('f-ncita').value.trim() || '';
   } else {
-    html+=`<div class="row2"><div class="form-section"><label>Piedra</label><select id="e-piedra"><option value="">Sin piedra</option>${['Granito','Mármol','Silestone','Posformado','Por definir'].map(o=>`<option ${x.piedra===o?'selected':''}>${o}</option>`).join('')}</select></div><div class="form-section"><label>Melamina</label><input type="text" id="e-melamina" value="${x.melamina||''}"></div></div>
-    <div class="form-section"><label>Extras</label><div class="check-grid">${['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'].map(ek=>`<button type="button" class="extra-btn${x['x_'+ek]?' sel':''}" onclick="this.classList.toggle('sel')">${ek.charAt(0).toUpperCase()+ek.slice(1)}</button>`).join('')}</div></div>
-    <div class="form-section"><label>Croquis</label><textarea id="e-croquis">${x.croquis||''}</textarea></div>
-    <div class="row2"><div class="form-section"><label>Fecha venta</label><input type="date" id="e-fventa" value="${x.fventa||''}"></div><div class="form-section"><label>Fecha entrega</label><input type="date" id="e-fentrega" value="${x.fentrega||''}"></div></div>
-    <div class="form-section"><label>Hora entrega</label><input type="time" id="e-hentrega" value="${x.hentrega||''}"></div>
-    <div class="form-section"><label>Dir. entrega</label><input type="text" id="e-dir2" value="${x.dir2||''}"></div><div style="height:1px;background:var(--border);margin:8px 0"></div>
-    <div class="form-section"><label>Total ($)</label><input type="number" id="e-total" value="${x.total||''}"></div>
-    <div class="row2"><div class="form-section"><label>Abono 1 ($)</label><input type="number" id="e-ab1" value="${x.ab1||''}"></div><div class="form-section"><label>Abono 2 ($)</label><input type="number" id="e-ab2" value="${x.ab2||''}"></div></div>
-    <div class="form-section"><label>Forma pago</label><select id="e-pago"><option value="">—</option>${['Efectivo','Transferencia','Débito','Crédito','Mixto'].map(o=>`<option ${x.formaPago===o?'selected':''}>${o}</option>`).join('')}</select></div>
-    <div class="form-section"><label>Notas</label><textarea id="e-nped">${x.nped||''}</textarea></div>
-    <div class="form-section"><label>Estado</label><select id="e-estado"><option value="pendiente" ${x.estado==='pendiente'?'selected':''}>Pendiente</option><option value="entregado" ${x.estado==='entregado'?'selected':''}>Entregado</option><option value="cancelado" ${x.estado==='cancelado'?'selected':''}>Cancelado</option></select></div>`;
+    const fe = document.getElementById('f-fentrega').value;
+    if(!fe){ alert('Selecciona la propuesta de entrega.'); return; }
+    base.fventa = document.getElementById('f-fventa').value || '';
+    base.fentrega = fe;
+    base.hentrega = document.getElementById('f-hentrega').value || '';
+    base.dir2 = document.getElementById('f-dir2').value.trim() || '';
+    base.piedra = document.getElementById('f-piedra').value || '';
+    base.melamina = document.getElementById('f-melamina').value.trim() || '';
+    base.croquis = document.getElementById('f-croquis').value.trim() || '';
+    base.total = document.getElementById('f-total').value || null;
+    base.ab1 = document.getElementById('f-ab1').value || null;
+    base.ab2 = document.getElementById('f-ab2').value || null;
+    base.formaPago = document.getElementById('f-pago').value || '';
+    base.nped = document.getElementById('f-nped').value.trim() || '';
+    
+    // Extras
+    const nombres = ['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'];
+    document.querySelectorAll('#extras-grid .extra-btn').forEach((btn, i) => {
+      base['x_' + nombres[i]] = btn.classList.contains('sel');
+    });
   }
+  
+  try {
+    await saveData(null, base);
+    document.querySelectorAll('#p-nuevo input:not([type=checkbox])').forEach(el => {
+      if(el.type === 'time') el.value = '10:00';
+      else el.value = '';
+    });
+    document.querySelectorAll('#p-nuevo textarea').forEach(el => el.value = '');
+    document.querySelectorAll('#p-nuevo select').forEach(el => el.value = '');
+    document.querySelectorAll('#extras-grid .extra-btn').forEach(btn => btn.classList.remove('sel'));
+    await cargarDatos();
+    actualizarDatalist();
+    go('hoy');
+  } catch(e) { 
+    alert('Error al guardar: ' + e.message); 
+  }
+}
 
   html+=`<div class="btn-row"><button class="btn-main" onclick="guardarEdicion('${id}','${x.tipo}')">💾 Guardar cambios</button><button class="btn-outline" onclick="cerrarModal()">Cancelar</button></div>
   <div style="margin-top:10px"><button class="btn-red" onclick="eliminarRegistro('${id}')">🗑️ Eliminar registro</button></div>`;
@@ -659,16 +691,50 @@ window.abrirEditar = function(id){
 }
 
 window.guardarEdicion = async function(id, tipo){
-  const esCita=tipo==='cita';
-  const datos={nombre: document.getElementById('e-nom').value.trim(), tel: document.getElementById('e-tel').value.trim(), dir: document.getElementById('e-dir').value.trim(), estado: document.getElementById('e-estado').value};
+  const esCita = tipo === 'cita';
+  const datos = {
+    nombre: (document.getElementById('e-nom')?.value || '').trim(),
+    tel: (document.getElementById('e-tel')?.value || '').trim(),
+    dir: (document.getElementById('e-dir')?.value || '').trim(),
+    estado: document.getElementById('e-estado')?.value || 'pendiente'
+  };
+  
   if(esCita){
-    Object.assign(datos,{fecha: document.getElementById('e-fecha').value, hora: document.getElementById('e-hora').value, lcita: document.getElementById('e-lcita').value.trim(), qcita: document.getElementById('e-qcita').value.trim(), pcita: document.getElementById('e-pcita').value||null, piedraC: document.getElementById('e-piedraC').value.trim(), ncita: document.getElementById('e-ncita').value.trim()});
+    datos.fecha = document.getElementById('e-fecha')?.value || '';
+    datos.hora = document.getElementById('e-hora')?.value || '';
+    datos.lcita = (document.getElementById('e-lcita')?.value || '').trim();
+    datos.qcita = (document.getElementById('e-qcita')?.value || '').trim();
+    datos.pcita = document.getElementById('e-pcita')?.value || null;
+    datos.piedraC = (document.getElementById('e-piedraC')?.value || '').trim();
+    datos.ncita = (document.getElementById('e-ncita')?.value || '').trim();
   } else {
-    const extras={};
-    document.querySelectorAll('#modal-body .extra-btn').forEach(btn=>{extras['x_'+btn.textContent.trim().toLowerCase()]=btn.classList.contains('sel');});
-    Object.assign(datos,{piedra: document.getElementById('e-piedra').value, melamina: document.getElementById('e-melamina').value.trim(), croquis: document.getElementById('e-croquis').value.trim(), fventa: document.getElementById('e-fventa').value, fentrega: document.getElementById('e-fentrega').value, hentrega: document.getElementById('e-hentrega').value, dir2: document.getElementById('e-dir2').value.trim(), total: document.getElementById('e-total').value||null, ab1: document.getElementById('e-ab1').value||null, ab2: document.getElementById('e-ab2').value||null, formaPago: document.getElementById('e-pago').value, nped: document.getElementById('e-nped').value.trim(), ...extras});
+    datos.piedra = document.getElementById('e-piedra')?.value || '';
+    datos.melamina = (document.getElementById('e-melamina')?.value || '').trim();
+    datos.croquis = (document.getElementById('e-croquis')?.value || '').trim();
+    datos.fventa = document.getElementById('e-fventa')?.value || '';
+    datos.fentrega = document.getElementById('e-fentrega')?.value || '';
+    datos.hentrega = document.getElementById('e-hentrega')?.value || '';
+    datos.dir2 = (document.getElementById('e-dir2')?.value || '').trim();
+    datos.total = document.getElementById('e-total')?.value || null;
+    datos.ab1 = document.getElementById('e-ab1')?.value || null;
+    datos.ab2 = document.getElementById('e-ab2')?.value || null;
+    datos.formaPago = document.getElementById('e-pago')?.value || '';
+    datos.nped = (document.getElementById('e-nped')?.value || '').trim();
+    
+    const extras = {};
+    document.querySelectorAll('#modal-body .extra-btn').forEach(btn => {
+      const nombre = btn.textContent.trim().toLowerCase();
+      extras['x_' + nombre] = btn.classList.contains('sel');
+    });
+    Object.assign(datos, extras);
   }
-  try { await saveData(id, datos); cerrarModal(); } catch(e) { alert('Error al guardar.'); }
+  
+  try { 
+    await saveData(id, datos); 
+    cerrarModal(); 
+  } catch(e) { 
+    alert('Error al guardar: ' + e.message); 
+  }
 }
 
 window.eliminarRegistro = async function(id){
