@@ -257,23 +257,25 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
       <div id="bloque-pedido" style="display:none">
         <div style="height:1px;background:var(--border);margin:4px 0 14px"></div>
         <div class="row2"><div class="form-section"><label>Tipo de piedra</label><select id="f-piedra"><option value="">Sin piedra</option><option>Granito</option><option>Mármol</option><option>Silestone</option><option>Posformado</option><option>Por definir</option></select></div><div class="form-section"><label>Color melamina</label><input type="text" id="f-melamina" placeholder="Ej: Grafito, Blanco..."></div></div>
-      <div class="form-section"><label>Extras incluidos</label>
+     <div class="form-section"><label>Extras incluidos</label>
   <div class="check-grid" id="extras-grid">
-    <div class="chk extra-btn" data-extra="enchufe" onclick="toggleExtra(this)">Enchufe</div>
-    <div class="chk extra-btn" data-extra="lavaplatos" onclick="toggleExtra(this)">Lavaplatos</div>
-    <div class="chk extra-btn" data-extra="gas" onclick="toggleExtra(this)">Gas</div>
-    <div class="chk extra-btn" data-extra="horno" onclick="toggleExtra(this)">Horno micr.</div>
-    <div class="chk extra-btn" data-extra="agua" onclick="toggleExtra(this)">Agua</div>
-    <div class="chk extra-btn" data-extra="campana" onclick="toggleExtra(this)">Campana</div>
-    <div class="chk extra-btn" data-extra="piedra" onclick="toggleExtra(this)">Piedra</div>
-    <div class="chk extra-btn" data-extra="copero" onclick="toggleExtra(this)">Copero</div>
-    <div class="chk extra-btn" data-extra="post" onclick="toggleExtra(this)">Post</div>
-    <div class="chk extra-btn" data-extra="peninsula" onclick="toggleExtra(this)">Península</div>
+    <div class="chk extra-btn" data-extra="enchufe" onclick="toggleExtra(this)"><span class="extra-box"></span> Enchufe</div>
+    <div class="chk extra-btn" data-extra="lavaplatos" onclick="toggleExtra(this)"><span class="extra-box"></span> Lavaplatos</div>
+    <div class="chk extra-btn" data-extra="gas" onclick="toggleExtra(this)"><span class="extra-box"></span> Gas</div>
+    <div class="chk extra-btn" data-extra="horno" onclick="toggleExtra(this)"><span class="extra-box"></span> Horno micr.</div>
+    <div class="chk extra-btn" data-extra="agua" onclick="toggleExtra(this)"><span class="extra-box"></span> Agua</div>
+    <div class="chk extra-btn" data-extra="campana" onclick="toggleExtra(this)"><span class="extra-box"></span> Campana</div>
+    <div class="chk extra-btn" data-extra="piedra" onclick="toggleExtra(this)"><span class="extra-box"></span> Piedra</div>
+    <div class="chk extra-btn" data-extra="copero" onclick="toggleExtra(this)"><span class="extra-box"></span> Copero</div>
+    <div class="chk extra-btn" data-extra="post" onclick="toggleExtra(this)"><span class="extra-box"></span> Post</div>
+    <div class="chk extra-btn" data-extra="peninsula" onclick="toggleExtra(this)"><span class="extra-box"></span> Península</div>
   </div>
   <style>
-.extra-btn{transition:all .15s;user-select:none;cursor:pointer}
+.extra-btn{display:flex;align-items:center;gap:8px;transition:all .15s;user-select:none;cursor:pointer;font-size:13px}
 .extra-btn.sel{background:var(--text)!important;color:#fff!important;border-color:var(--text)!important}
-.extra-btn.sel::after{content:' ✓';font-size:12px;margin-left:6px;font-weight:700}
+.extra-box{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all .15s}
+.extra-btn.sel .extra-box{background:var(--green);border-color:var(--green)}
+.extra-btn.sel .extra-box::after{content:'✓';color:#fff;font-weight:700;font-size:11px}
   </style>
 </div>
         <div class="form-section"><label>Croquis / boceto</label><textarea id="f-croquis" rows="4" placeholder="Ej: Cocina en L, 3m pared norte..."></textarea></div>
