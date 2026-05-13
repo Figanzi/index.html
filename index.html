@@ -703,6 +703,11 @@ window.guardar = async function(){
     document.querySelectorAll('#p-nuevo textarea').forEach(el=>el.value='');
     document.querySelectorAll('#p-nuevo select').forEach(el=>el.value='');
     document.querySelectorAll('#extras-grid .extra-btn').forEach(btn=>btn.classList.remove('sel'));
+    
+    // ✅ Forzar recarga de datos
+    await cargarDatos();
+    actualizarDatalist();
+    
     go('hoy');
   } catch(e) { alert('Error al guardar: ' + e.message); }
 }
