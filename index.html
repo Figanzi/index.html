@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="FigAnzi">
 <title>FigAnzi</title>
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>📐</text></svg>">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
 
@@ -36,7 +37,6 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);overscroll-behavior:none}
 
-/* LAYOUT */
 .app{display:flex;flex-direction:column;height:100vh;max-width:430px;margin:0 auto;background:var(--bg)}
 .header{background:var(--text);padding:env(safe-area-inset-top,16px) 20px 14px;flex-shrink:0}
 .header-inner{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
@@ -46,7 +46,6 @@ html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;colo
 .header-right{text-align:right}
 .header-mes{font-size:13px;color:rgba(255,255,255,.8);font-weight:500}
 
-/* SYNC INDICATOR */
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#4caf50;display:inline-block;margin-left:6px;vertical-align:middle;transition:background .3s}
 .sync-dot.syncing{background:#ff9800;animation:pulse .8s infinite}
 .sync-dot.error{background:#f44336}
@@ -56,18 +55,15 @@ html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;colo
 .pane{display:none;padding:16px}
 .pane.active{display:block}
 
-/* NAV */
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--surface);border-top:1px solid var(--border);display:flex;padding:8px 0 env(safe-area-inset-bottom,8px);z-index:100}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;color:var(--text3);cursor:pointer;padding:6px 2px;letter-spacing:.3px;text-transform:uppercase}
 .nav-btn svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
 .nav-btn.active{color:var(--red)}
 .nav-btn.active svg{transform:scale(1.1)}
 
-/* CARDS */
 .card{background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:10px;border:1px solid var(--border)}
 .card-sm{background:var(--surface);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;border:1px solid var(--border)}
 
-/* STATS */
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .stat-card{background:var(--surface);border-radius:var(--radius);padding:14px;border:1px solid var(--border)}
 .stat-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
@@ -75,10 +71,8 @@ html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;colo
 .stat-num.red{color:var(--red)}
 .stat-num.green{color:var(--green)}
 
-/* SECTION TITLE */
 .sec-title{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin:16px 0 8px}
 
-/* BADGES */
 .badge{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;letter-spacing:.2px}
 .badge.pend{background:var(--amber-light);color:var(--amber)}
 .badge.conf{background:var(--blue-light);color:var(--blue)}
@@ -88,7 +82,6 @@ html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;colo
 .badge.pago-no{background:var(--red-light);color:var(--red)}
 .badge.pago-parc{background:var(--amber-light);color:var(--amber)}
 
-/* CLIENTE CARD */
 .cliente-card{background:var(--surface);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;border:1px solid var(--border);cursor:pointer;transition:background .15s}
 .cliente-card:active{background:var(--surface2)}
 .cliente-avatar{width:40px;height:40px;border-radius:50%;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0}
@@ -103,7 +96,6 @@ html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;colo
 .mp-saldo{background:var(--red-light);color:var(--red)}
 .mp-ok{background:var(--green-light);color:var(--green)}
 
-/* FORMAS */
 .form-section{margin-bottom:14px}
 .form-section label{display:block;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
 input,select,textarea{width:100%;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none}
@@ -116,23 +108,19 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .btn-green{background:var(--green);color:#fff;border:none;padding:8px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
 .btn-row{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
 
-/* CHECK GRID */
 .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .chk{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;font-size:13px;background:var(--surface)}
 .chk input{width:15px;height:15px;accent-color:var(--red);cursor:pointer;flex-shrink:0}
 
-/* TIPO SEL */
 .tipo-sel{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
 .tipo-btn{padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;text-align:center;transition:all .15s}
 .tipo-btn.sel{background:var(--text);color:#fff;border-color:var(--text)}
 
-/* FILTROS */
 .filter-row{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px}
 .filter-row::-webkit-scrollbar{display:none}
 .filt{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0}
 .filt.active{background:var(--text);color:#fff;border-color:var(--text)}
 
-/* CALENDARIO */
 .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .cal-header h2{font-family:'DM Serif Display',serif;font-size:20px}
 .cal-nav{display:flex;gap:8px}
@@ -148,7 +136,6 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .dot{width:4px;height:4px;border-radius:50%;background:var(--red);margin:2px auto 0}
 .cal-events{margin-top:4px}
 
-/* PERFIL CLIENTE */
 .perfil-back{display:flex;align-items:center;gap:8px;margin-bottom:14px;cursor:pointer;color:var(--text2);font-size:13px;font-weight:500}
 .perfil-avatar{width:56px;height:56px;border-radius:50%;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;flex-shrink:0}
 .perfil-head{display:flex;align-items:center;gap:14px;margin-bottom:16px}
@@ -165,12 +152,10 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .h-fecha{font-size:11px;color:var(--text3)}
 .h-det{font-size:12px;color:var(--text2);line-height:1.5}
 
-/* AVISO */
 .aviso{background:var(--green-light);border:1px solid var(--green-mid);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px}
 .aviso strong{font-size:13px;font-weight:600;color:var(--green);display:block;margin-bottom:3px}
 .aviso p{font-size:12px;color:var(--green);white-space:pre-line;line-height:1.5}
 
-/* LOADING */
 .loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500;gap:16px}
 .loading-overlay.hidden{display:none}
 .loading-logo{font-family:'DM Serif Display',serif;font-size:32px;color:var(--text)}
@@ -179,19 +164,16 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-txt{font-size:12px;color:var(--text3)}
 
-/* MODAL EDITAR */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
 .modal{background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;padding:20px;width:100%;max-width:430px;max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
 .modal-title{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:16px}
 
-/* EMPTY */
 .empty{text-align:center;padding:40px 20px;color:var(--text3)}
 .empty-icon{font-size:36px;margin-bottom:8px}
 .empty p{font-size:14px}
 
-/* PDF */
 @media print{
   .app,.nav,.header{display:none!important}
   #pdf-preview{display:block!important}
@@ -210,7 +192,6 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 </head>
 <body>
 
-<!-- LOADING -->
 <div class="loading-overlay" id="loading-overlay">
   <div class="loading-logo"><span>Fig</span>Anzi.</div>
   <div class="spinner"></div>
@@ -221,7 +202,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
   <div class="header">
     <div class="header-inner">
       <div>
-        <div class="logo"><span>Fig</span>Anzi. <span class="sync-dot" id="sync-dot" title="Estado de sincronización"></span></div>
+        <div class="logo"><span>Fig</span>Anzi. <span class="sync-dot" id="sync-dot"></span></div>
         <div class="header-date" id="h-fecha"></div>
       </div>
       <div class="header-right">
@@ -231,13 +212,8 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
   </div>
 
   <div class="content">
-
-    <!-- HOY -->
     <div class="pane active" id="p-hoy">
-      <div id="aviso-hoy" class="aviso" style="display:none">
-        <strong>☀️ Buenos días — agenda de hoy</strong>
-        <p id="aviso-txt"></p>
-      </div>
+      <div id="aviso-hoy" class="aviso" style="display:none"><strong>☀️ Buenos días — agenda de hoy</strong><p id="aviso-txt"></p></div>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-label">Citas hoy</div><div class="stat-num" id="s-citas">0</div></div>
         <div class="stat-card"><div class="stat-label">Entregas hoy</div><div class="stat-num" id="s-ent">0</div></div>
@@ -250,21 +226,13 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
       <div id="lista-prox"></div>
     </div>
 
-    <!-- CALENDARIO -->
     <div class="pane" id="p-cal">
-      <div class="cal-header">
-        <h2 id="cal-titulo"></h2>
-        <div class="cal-nav">
-          <button onclick="calNav(-1)">‹</button>
-          <button onclick="calNav(1)">›</button>
-        </div>
-      </div>
+      <div class="cal-header"><h2 id="cal-titulo"></h2><div class="cal-nav"><button onclick="calNav(-1)">‹</button><button onclick="calNav(1)">›</button></div></div>
       <div class="cal-grid" id="cal-grid"></div>
       <div class="sec-title" id="cal-sel-titulo">Todos los eventos del mes</div>
       <div id="cal-events"></div>
     </div>
 
-    <!-- CLIENTES -->
     <div class="pane" id="p-clientes">
       <div id="vista-lista-clientes">
         <input type="search" id="busca-cliente" placeholder="Buscar cliente..." style="margin-bottom:12px" oninput="renderClientes()">
@@ -278,157 +246,479 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
       <div id="vista-perfil" style="display:none"></div>
     </div>
 
-    <!-- NUEVO -->
     <div class="pane" id="p-nuevo">
       <div class="tipo-sel">
         <button class="tipo-btn sel" onclick="selTipo('cita',this)">📅 Cita</button>
         <button class="tipo-btn" onclick="selTipo('pedido',this)">📦 Pedido</button>
       </div>
-
-      <div class="form-section"><label>Nombre del cliente</label>
-        <input type="text" id="f-nom" placeholder="Nombre completo" list="clientes-list">
-        <datalist id="clientes-list"></datalist>
-      </div>
+      <div class="form-section"><label>Nombre del cliente</label><input type="text" id="f-nom" placeholder="Nombre completo" list="clientes-list"><datalist id="clientes-list"></datalist></div>
       <div class="row2">
         <div class="form-section"><label>Teléfono</label><input type="tel" id="f-tel" placeholder="+56 9 ..."></div>
         <div class="form-section"><label>Dirección</label><input type="text" id="f-dir" placeholder="Calle y número"></div>
       </div>
-
       <div id="bloque-cita">
         <div style="height:1px;background:var(--border);margin:4px 0 14px"></div>
-        <div class="row2">
-          <div class="form-section"><label>Fecha cita</label><input type="date" id="f-fcita"></div>
-          <div class="form-section"><label>Hora</label><input type="time" id="f-hcita" value="10:00"></div>
-        </div>
+        <div class="row2"><div class="form-section"><label>Fecha cita</label><input type="date" id="f-fcita"></div><div class="form-section"><label>Hora</label><input type="time" id="f-hcita" value="10:00"></div></div>
         <div class="form-section"><label>Lugar</label><input type="text" id="f-lcita" placeholder="Taller, domicilio..."></div>
         <div class="form-section"><label>Qué quiere el cliente</label><textarea id="f-qcita" placeholder="Cocina, clóset, medidas, colores, referencias..."></textarea></div>
-        <div class="row2">
-          <div class="form-section"><label>Precio cotizado ($)</label><input type="number" id="f-pcita" placeholder="0"></div>
-          <div class="form-section"><label>Tipo de piedra</label><input type="text" id="f-piedra-c" placeholder="Granito, mármol..."></div>
-        </div>
+        <div class="row2"><div class="form-section"><label>Precio cotizado ($)</label><input type="number" id="f-pcita" placeholder="0"></div><div class="form-section"><label>Tipo de piedra</label><input type="text" id="f-piedra-c" placeholder="Granito, mármol..."></div></div>
         <div class="form-section"><label>Notas</label><textarea id="f-ncita" rows="2" placeholder="Lo que no debes olvidar..."></textarea></div>
       </div>
-
       <div id="bloque-pedido" style="display:none">
         <div style="height:1px;background:var(--border);margin:4px 0 14px"></div>
-        <div class="row2">
-          <div class="form-section"><label>Tipo de piedra</label>
-            <select id="f-piedra">
-              <option value="">Sin piedra</option>
-              <option>Granito</option><option>Mármol</option><option>Silestone</option><option>Posformado</option><option>Por definir</option>
-            </select>
-          </div>
-          <div class="form-section"><label>Color melamina</label><input type="text" id="f-melamina" placeholder="Ej: Grafito, Blanco..."></div>
-        </div>
-        <div class="form-section"><label>Extras incluidos</label>
-          <div class="check-grid">
-            <label class="chk"><input type="checkbox" id="x-enchufe"> Enchufe</label>
-            <label class="chk"><input type="checkbox" id="x-lavaplatos"> Lavaplatos</label>
-            <label class="chk"><input type="checkbox" id="x-gas"> Gas</label>
-            <label class="chk"><input type="checkbox" id="x-horno"> Horno micr.</label>
-            <label class="chk"><input type="checkbox" id="x-agua"> Agua</label>
-            <label class="chk"><input type="checkbox" id="x-campana"> Campana</label>
-            <label class="chk"><input type="checkbox" id="x-piedra"> Piedra</label>
-            <label class="chk"><input type="checkbox" id="x-copero"> Copero</label>
-            <label class="chk"><input type="checkbox" id="x-post"> Post</label>
-            <label class="chk"><input type="checkbox" id="x-peninsula"> Península</label>
-          </div>
-        </div>
-        <div class="form-section"><label>Croquis / boceto (descripción)</label>
-          <textarea id="f-croquis" rows="4" placeholder="Ej: Cocina en L, 3m pared norte + 1.5m pared este..."></textarea>
-        </div>
-        <div class="row2">
-          <div class="form-section"><label>Fecha de venta</label><input type="date" id="f-fventa"></div>
-          <div class="form-section"><label>Propuesta entrega</label><input type="date" id="f-fentrega"></div>
-        </div>
+        <div class="row2"><div class="form-section"><label>Tipo de piedra</label><select id="f-piedra"><option value="">Sin piedra</option><option>Granito</option><option>Mármol</option><option>Silestone</option><option>Posformado</option><option>Por definir</option></select></div><div class="form-section"><label>Color melamina</label><input type="text" id="f-melamina" placeholder="Ej: Grafito, Blanco..."></div></div>
+        <div class="form-section"><label>Extras incluidos</label><div class="check-grid">
+          <label class="chk"><input type="checkbox" id="x-enchufe"> Enchufe</label><label class="chk"><input type="checkbox" id="x-lavaplatos"> Lavaplatos</label>
+          <label class="chk"><input type="checkbox" id="x-gas"> Gas</label><label class="chk"><input type="checkbox" id="x-horno"> Horno micr.</label>
+          <label class="chk"><input type="checkbox" id="x-agua"> Agua</label><label class="chk"><input type="checkbox" id="x-campana"> Campana</label>
+          <label class="chk"><input type="checkbox" id="x-piedra"> Piedra</label><label class="chk"><input type="checkbox" id="x-copero"> Copero</label>
+          <label class="chk"><input type="checkbox" id="x-post"> Post</label><label class="chk"><input type="checkbox" id="x-peninsula"> Península</label>
+        </div></div>
+        <div class="form-section"><label>Croquis / boceto</label><textarea id="f-croquis" rows="4" placeholder="Ej: Cocina en L, 3m pared norte..."></textarea></div>
+        <div class="row2"><div class="form-section"><label>Fecha de venta</label><input type="date" id="f-fventa"></div><div class="form-section"><label>Propuesta entrega</label><input type="date" id="f-fentrega"></div></div>
         <div class="form-section"><label>Hora de entrega</label><input type="time" id="f-hentrega" value="10:00"></div>
-        <div class="form-section"><label>Dirección de entrega (si difiere)</label><input type="text" id="f-dir2" placeholder="Dejar vacío si es la misma"></div>
+        <div class="form-section"><label>Dirección de entrega</label><input type="text" id="f-dir2" placeholder="Dejar vacío si es la misma"></div>
         <div style="height:1px;background:var(--border);margin:4px 0 14px"></div>
         <div class="form-section"><label>Total ($)</label><input type="number" id="f-total" placeholder="0"></div>
-        <div class="row2">
-          <div class="form-section"><label>Abono 1 ($)</label><input type="number" id="f-ab1" placeholder="0"></div>
-          <div class="form-section"><label>Abono 2 ($)</label><input type="number" id="f-ab2" placeholder="0"></div>
-        </div>
-        <div class="form-section"><label>Forma de pago</label>
-          <select id="f-pago">
-            <option value="">Seleccionar...</option>
-            <option>Efectivo</option><option>Transferencia</option><option>Débito</option><option>Crédito</option><option>Mixto</option>
-          </select>
-        </div>
+        <div class="row2"><div class="form-section"><label>Abono 1 ($)</label><input type="number" id="f-ab1" placeholder="0"></div><div class="form-section"><label>Abono 2 ($)</label><input type="number" id="f-ab2" placeholder="0"></div></div>
+        <div class="form-section"><label>Forma de pago</label><select id="f-pago"><option value="">Seleccionar...</option><option>Efectivo</option><option>Transferencia</option><option>Débito</option><option>Crédito</option><option>Mixto</option></select></div>
         <div class="form-section"><label>Notas del pedido</label><textarea id="f-nped" rows="2" placeholder="Instalación, piso, acceso especial..."></textarea></div>
       </div>
-
       <button class="btn-main" onclick="guardar()" style="margin-top:8px">Guardar</button>
     </div>
+  </div>
 
-  </div><!-- /content -->
-
-  <!-- NAV -->
   <nav class="nav">
-    <button class="nav-btn active" onclick="go('hoy')" id="n-hoy">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Hoy
-    </button>
-    <button class="nav-btn" onclick="go('cal')" id="n-cal">
-      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Mes
-    </button>
-    <button class="nav-btn" onclick="go('clientes')" id="n-clientes">
-      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clientes
-    </button>
-    <button class="nav-btn" onclick="go('nuevo')" id="n-nuevo">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Nuevo
-    </button>
+    <button class="nav-btn active" onclick="go('hoy')" id="n-hoy"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Hoy</button>
+    <button class="nav-btn" onclick="go('cal')" id="n-cal"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Mes</button>
+    <button class="nav-btn" onclick="go('clientes')" id="n-clientes"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clientes</button>
+    <button class="nav-btn" onclick="go('nuevo')" id="n-nuevo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Nuevo</button>
   </nav>
 </div>
 
-<!-- MODAL EDITAR -->
-<div class="modal-overlay" id="modal-editar">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="modal-title">Editar registro</div>
-    <div id="modal-body"></div>
-  </div>
-</div>
-
-<!-- PDF OCULTO -->
+<div class="modal-overlay" id="modal-editar"><div class="modal"><div class="modal-handle"></div><div class="modal-title" id="modal-title"></div><div id="modal-body"></div></div></div>
 <div id="pdf-preview"></div>
 
-<!-- SUPABASE SDK -->
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-// ============ SUPABASE CONFIG ============
 const SUPABASE_URL = "https://iebklwcjhcdtlwxzjvxl.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllYmtsd2NqaGNkdGx3eHpqdnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MjU3ODQsImV4cCI6MjA5NDIwMTc4NH0.TJEAILjiaMGo2iu8hCVJ0PbkMboIpKSe2X3bMgxrJ_E";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllYmtsd2NqaGNkdGx3eHpqdnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MjU3ODQsImV4cCI6MjA5NDIwMTc4NH0.TJEAILjiaMGo2iu8hCVJ0PbkMboIpKSe2X3bMgxrJ_E";
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// ============ CACHE LOCAL ============
 let _cache = [];
-
 function getData() { return _cache; }
 
-function setSyncStatus(state) {
-  const dot = document.getElementById('sync-dot');
-  if (!dot) return;
-  dot.className = 'sync-dot' + (state === 'syncing' ? ' syncing' : state === 'error' ? ' error' : '');
-  dot.title = state === 'ok' ? 'Sincronizado' : state === 'syncing' ? 'Sincronizando…' : 'Error de conexión';
+function setSyncStatus(s) {
+  const d = document.getElementById('sync-dot');
+  if (!d) return;
+  d.className = 'sync-dot' + (s === 'syncing' ? ' syncing' : s === 'error' ? ' error' : '');
+  d.title = s === 'ok' ? 'Conectado' : s === 'syncing' ? 'Guardando...' : 'Error';
 }
 
-// ============ SUPABASE HELPERS ============
+async function cargarDatos() {
+  const { data, error } = await supabase.from('registros').select('*').order('id', { ascending: true });
+  if (error) throw error;
+  _cache = data.map(r => ({ id: String(r.id), ...r.datos }));
+}
+
 async function saveData(docId, datos) {
   setSyncStatus('syncing');
+  if (docId) {
+    const { error } = await supabase.from('registros').update({ datos }).eq('id', docId);
+    if (error) throw error;
+  } else {
+    const { data, error } = await supabase.from('registros').insert({ datos }).select('id').single();
+    if (error) throw error;
+    docId = String(data.id);
+  }
+  await cargarDatos();
+  setSyncStatus('ok');
+  return docId;
+}
+
+async function deleteData(docId) {
+  setSyncStatus('syncing');
+  const { error } = await supabase.from('registros').delete().eq('id', docId);
+  if (error) throw error;
+  await cargarDatos();
+  setSyncStatus('ok');
+}
+
+// ============ UTILS ============
+function hoy(){return new Date().toISOString().split('T')[0]}
+function fmt(s){if(!s)return'';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`}
+function fmtM(n){if(!n&&n!==0)return null;return'$'+Math.round(Number(n)).toLocaleString('es-CL')}
+function iniciales(nom){return nom.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?'}
+function saldo(x){return(Number(x.total)||0)-(Number(x.ab1)||0)-(Number(x.ab2)||0)}
+function mesStr(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+function nombreMes(d){return d.toLocaleDateString('es-CL',{month:'long',year:'numeric'})}
+
+// ============ ESTADO ============
+let tipoActual='cita';
+let filtroClientes='todos';
+let calFecha=new Date();
+let calSelDia=null;
+let perfilActivo=null;
+
+window.go = function(p){
+  document.querySelectorAll('.pane').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  document.getElementById('p-'+p).classList.add('active');
+  document.getElementById('n-'+p).classList.add('active');
+  if(p==='hoy') renderHoy();
+  if(p==='cal'){calSelDia=null;renderCal();}
+  if(p==='clientes'){perfilActivo=null;renderClientes();}
+  if(p==='nuevo') actualizarDatalist();
+}
+
+window.selTipo = function(t,el){
+  tipoActual=t;
+  document.querySelectorAll('.tipo-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('bloque-cita').style.display=t==='cita'?'block':'none';
+  document.getElementById('bloque-pedido').style.display=t==='pedido'?'block':'none';
+}
+
+function renderHoy(){
+  const data=getData(), h=hoy();
+  const citas=data.filter(x=>x.tipo==='cita'&&x.fecha===h&&x.estado!=='cancelado');
+  const entregas=data.filter(x=>x.tipo==='pedido'&&x.fentrega===h&&x.estado==='pendiente');
+  const mesActual=mesStr(new Date());
+  const delMes=data.filter(x=>x.tipo==='pedido'&&(x.fventa||'').startsWith(mesActual));
+  const genMes=delMes.reduce((a,x)=>a+(Number(x.total)||0),0);
+  const porCobrar=data.filter(x=>x.tipo==='pedido'&&x.estado==='pendiente').reduce((a,x)=>a+saldo(x),0);
+
+  document.getElementById('s-citas').textContent=citas.length;
+  document.getElementById('s-ent').textContent=entregas.length;
+  document.getElementById('s-mes').textContent='$'+Math.round(genMes).toLocaleString('es-CL');
+  document.getElementById('s-cobrar').textContent='$'+Math.round(porCobrar).toLocaleString('es-CL');
+
+  const hora=new Date().getHours();
+  const deHoy=[...citas,...entregas].sort((a,b)=>((a.hora||a.hentrega||'')>(b.hora||b.hentrega||''))?1:-1);
+  const av=document.getElementById('aviso-hoy');
+  if(hora>=7&&hora<=10&&deHoy.length>0){
+    document.getElementById('aviso-txt').textContent=deHoy.map(x=>x.tipo==='cita'?`• Cita: ${x.nombre}${x.hora?' a las '+x.hora:''}${x.lcita?' — '+x.lcita:''}`:`• Entrega: ${x.nombre}${x.hentrega?' a las '+x.hentrega:''}`).join('\n');
+    av.style.display='block';
+  } else av.style.display='none';
+
+  document.getElementById('lista-hoy').innerHTML=deHoy.length===0?'<div class="empty"><div class="empty-icon">🌙</div><p>Sin actividad para hoy</p></div>':deHoy.map(miniCard).join('');
+
+  const desde=new Date(); desde.setDate(desde.getDate()+1);
+  const hasta=new Date(); hasta.setDate(hasta.getDate()+7);
+  const prox=data.filter(x=>{
+    const f=x.tipo==='cita'?x.fecha:x.fentrega;
+    if(!f||x.estado==='cancelado'||x.estado==='entregado') return false;
+    const fd=new Date(f+'T12:00');
+    return fd>=desde&&fd<=hasta;
+  }).sort((a,b)=>{const fa=a.tipo==='cita'?a.fecha:a.fentrega;const fb=b.tipo==='cita'?b.fecha:b.fentrega;return fa>fb?1:-1;});
+  document.getElementById('lista-prox').innerHTML=prox.length===0?'<div class="empty" style="padding:20px"><p>Sin eventos próximos</p></div>':prox.map(miniCard).join('');
+}
+
+function miniCard(x){
+  const esCita=x.tipo==='cita';
+  const fecha=esCita?x.fecha:x.fentrega;
+  const hora=esCita?x.hora:x.hentrega;
+  const lbl={pendiente:'Pendiente',confirmada:'Confirmada',entregado:'Entregado',cancelado:'Cancelado'};
+  const bc={pendiente:'pend',confirmada:'conf',entregado:'ent',cancelado:'canc'}[x.estado]||'pend';
+  const s=saldo(x);
+  return`<div class="card-sm" style="cursor:pointer" onclick="abrirPerfil('${normNom(x.nombre)}')">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">${iniciales(x.nombre)}</div>
+        <div><div style="font-size:13px;font-weight:600">${x.nombre}</div><div style="font-size:11px;color:var(--text2)">${esCita?'Cita':'Pedido'} · ${fmt(fecha)}${hora?' · '+hora+'h':''}</div></div>
+      </div>
+      <span class="badge ${bc}">${lbl[x.estado]}</span>
+    </div>
+    ${x.tipo==='pedido'&&x.total?`<div style="display:flex;gap:5px;flex-wrap:wrap"><span class="money-pill mp-total">${fmtM(x.total)}</span>${x.ab1?`<span class="money-pill mp-ab">Ab.1 ${fmtM(x.ab1)}</span>`:''}${x.ab2?`<span class="money-pill mp-ab">Ab.2 ${fmtM(x.ab2)}</span>`:''}<span class="money-pill ${s<=0?'mp-ok':'mp-saldo'}">${s<=0?'Pagado':'Saldo '+fmtM(s)}</span></div>`:''}
+    ${x.tipo==='cita'&&x.pcita?`<span class="money-pill mp-total">Cotiz. ${fmtM(x.pcita)}</span>`:''}
+    <div style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+      ${x.estado==='pendiente'&&esCita?`<button class="btn-green" onclick="event.stopPropagation();cambiarEstado('${x.id}','confirmada')">✓ Confirmar</button>`:''}
+      ${x.estado==='pendiente'&&!esCita?`<button class="btn-green" onclick="event.stopPropagation();cambiarEstado('${x.id}','entregado')">✓ Entregado</button>`:''}
+      ${x.estado!=='cancelado'&&x.estado!=='entregado'?`<button class="btn-outline" onclick="event.stopPropagation();cambiarEstado('${x.id}','cancelado')">Cancelar</button>`:''}
+      <button class="btn-outline" onclick="event.stopPropagation();abrirEditar('${x.id}')">Editar</button>
+    </div>
+  </div>`;
+}
+
+window.cambiarEstado = async function(id, est){
+  try { await saveData(id, {estado: est}); } catch(e) { alert('Error al guardar.'); }
+}
+
+window.calNav = function(dir){
+  calFecha=new Date(calFecha.getFullYear(),calFecha.getMonth()+dir,1);
+  calSelDia=null;
+  renderCal();
+}
+
+function renderCal(){
+  const data=getData();
+  document.getElementById('cal-titulo').textContent=nombreMes(calFecha).replace(/^\w/,c=>c.toUpperCase());
+  const y=calFecha.getFullYear(), m=calFecha.getMonth();
+  const primer=new Date(y,m,1);
+  const ultimo=new Date(y,m+1,0);
+  let dias=[];
+  let dow=(primer.getDay()+6)%7;
+  for(let i=dow-1;i>=0;i--){const d=new Date(y,m,-i); dias.push({fecha:d,otroMes:true});}
+  for(let d=1;d<=ultimo.getDate();d++) dias.push({fecha:new Date(y,m,d),otroMes:false});
+  while(dias.length%7!==0) dias.push({fecha:new Date(y,m+1,dias.length-ultimo.getDate()-dow+1),otroMes:true});
+
+  const mesActual=mesStr(calFecha);
+  const eventosDelMes=data.filter(x=>{const f=x.tipo==='cita'?x.fecha:x.fentrega;return f&&f.startsWith(mesActual)&&x.estado!=='cancelado';});
+
+  const hoyS=hoy();
+  const names=['Lu','Ma','Mi','Ju','Vi','Sá','Do'];
+  let html=names.map(n=>`<div class="cal-day-name">${n}</div>`).join('');
+  dias.forEach(({fecha,otroMes})=>{
+    const fs=fecha.toISOString().split('T')[0];
+    const evs=eventosDelMes.filter(x=>(x.tipo==='cita'?x.fecha:x.fentrega)===fs);
+    const isHoy=fs===hoyS;
+    const isSel=fs===calSelDia;
+    const cls=['cal-day',otroMes?'other-month':'',isHoy?'today':'',isSel&&!isHoy?'selected':'',evs.length?'has-event':''].filter(Boolean).join(' ');
+    html+=`<div class="${cls}" onclick="selDiaCal('${fs}')">${fecha.getDate()}${evs.length&&!isHoy?`<div class="dot"></div>`:''}${evs.length&&isHoy?`<div class="dot" style="background:#fff"></div>`:''}</div>`;
+  });
+  document.getElementById('cal-grid').innerHTML=html;
+
+  if(calSelDia){
+    const evsDia=eventosDelMes.filter(x=>(x.tipo==='cita'?x.fecha:x.fentrega)===calSelDia);
+    document.getElementById('cal-sel-titulo').textContent=`Eventos del ${fmt(calSelDia)}`;
+    document.getElementById('cal-events').innerHTML=evsDia.length===0?'<div class="empty" style="padding:20px"><p>Sin eventos ese día</p></div>':evsDia.map(miniCard).join('');
+  } else {
+    document.getElementById('cal-sel-titulo').textContent='Todos los eventos del mes';
+    const todos=[...eventosDelMes].sort((a,b)=>{const fa=a.tipo==='cita'?a.fecha:a.fentrega;const fb=b.tipo==='cita'?b.fecha:b.fentrega;return fa>fb?1:-1;});
+    document.getElementById('cal-events').innerHTML=todos.length===0?'<div class="empty" style="padding:20px"><p>Sin eventos este mes</p></div>':todos.map(miniCard).join('');
+  }
+}
+
+window.selDiaCal = function(fs){calSelDia=calSelDia===fs?null:fs;renderCal();}
+
+function normNom(n){return n.trim().toLowerCase()}
+
+function getClientes(){
+  const data=getData();
+  const map={};
+  data.forEach(x=>{
+    const k=normNom(x.nombre);
+    if(!map[k]) map[k]={nombre:x.nombre,tel:x.tel||x.telefono||'',dir:x.dir||'',registros:[]};
+    map[k].registros.push(x);
+  });
+  return Object.values(map);
+}
+
+window.filtCl = function(f,el){
+  filtroClientes=f;
+  document.querySelectorAll('#p-clientes .filt').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderClientes();
+}
+
+function renderClientes(){
+  if(perfilActivo){renderPerfil(perfilActivo);return;}
+  document.getElementById('vista-lista-clientes').style.display='block';
+  document.getElementById('vista-perfil').style.display='none';
+  const busca=(document.getElementById('busca-cliente').value||'').toLowerCase();
+  let clientes=getClientes().filter(c=>c.nombre.toLowerCase().includes(busca));
+  if(filtroClientes==='debe') clientes=clientes.filter(c=>c.registros.some(x=>x.tipo==='pedido'&&saldo(x)>0&&x.estado!=='cancelado'));
+  if(filtroClientes==='pagado') clientes=clientes.filter(c=>c.registros.some(x=>x.tipo==='pedido'&&saldo(x)<=0&&x.estado!=='cancelado'));
+  clientes.sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+
+  if(clientes.length===0){
+    document.getElementById('lista-clientes').innerHTML='<div class="empty"><div class="empty-icon">👤</div><p>Sin clientes registrados</p></div>';
+    return;
+  }
+
+  document.getElementById('lista-clientes').innerHTML=clientes.map(c=>{
+    const pedidos=c.registros.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado');
+    const totalFacturado=pedidos.reduce((a,x)=>a+(Number(x.total)||0),0);
+    const totalSaldo=pedidos.reduce((a,x)=>a+saldo(x),0);
+    const pagoStatus=totalSaldo<=0&&totalFacturado>0?'pago-ok':totalSaldo>0?'pago-no':'';
+    const nCitas=c.registros.filter(x=>x.tipo==='cita').length;
+    const nPed=pedidos.length;
+    return`<div class="cliente-card" onclick="abrirPerfil('${normNom(c.nombre)}')">
+      <div class="cliente-head"><div class="cliente-avatar">${iniciales(c.nombre)}</div><div class="cliente-info"><h3>${c.nombre}</h3><p>${c.tel||'Sin teléfono'}</p></div></div>
+      <div class="cliente-meta"><span class="badge pend">${nCitas} cita${nCitas!==1?'s':''}</span><span class="badge conf">${nPed} pedido${nPed!==1?'s':''}</span>${pagoStatus?`<span class="badge ${pagoStatus}">${totalSaldo<=0&&totalFacturado>0?'Pagado al día':'Saldo pendiente'}</span>`:''}</div>
+      ${totalFacturado>0?`<div class="money-row"><span class="money-pill mp-total">Total ${fmtM(totalFacturado)}</span>${totalSaldo>0?`<span class="money-pill mp-saldo">Saldo ${fmtM(totalSaldo)}</span>`:''}${totalSaldo<=0?`<span class="money-pill mp-ok">Pagado</span>`:''}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+window.abrirPerfil = function(k){
+  perfilActivo=k;
+  document.getElementById('vista-lista-clientes').style.display='none';
+  document.getElementById('vista-perfil').style.display='block';
+  document.querySelectorAll('.pane').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  document.getElementById('p-clientes').classList.add('active');
+  document.getElementById('n-clientes').classList.add('active');
+  renderPerfil(k);
+}
+
+function renderPerfil(k){
+  const clientes=getClientes();
+  const c=clientes.find(x=>normNom(x.nombre)===k);
+  if(!c){perfilActivo=null;renderClientes();return;}
+  const pedidos=c.registros.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado');
+  const citas=c.registros.filter(x=>x.tipo==='cita');
+  const totalFacturado=pedidos.reduce((a,x)=>a+(Number(x.total)||0),0);
+  const totalAbonado=pedidos.reduce((a,x)=>a+(Number(x.ab1)||0)+(Number(x.ab2)||0),0);
+  const totalSaldo=pedidos.reduce((a,x)=>a+saldo(x),0);
+  const sorted=[...c.registros].sort((a,b)=>{const fa=a.tipo==='cita'?a.fecha:a.fentrega||a.fventa||'';const fb=b.tipo==='cita'?b.fecha:b.fentrega||b.fventa||'';return fa<fb?1:-1;});
+  const ultimaDir=c.dir||([...c.registros].reverse().find(x=>x.dir2||x.dir)||{}).dir2||([...c.registros].reverse().find(x=>x.dir)||{}).dir||'';
+
+  let html=`
+  <div class="perfil-back" onclick="volverClientes()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Volver a clientes</div>
+  <div style="background:var(--text);border-radius:var(--radius);padding:20px;margin-bottom:12px;position:relative;overflow:hidden">
+    <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.05)"></div>
+    <div style="position:absolute;bottom:-30px;right:20px;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.04)"></div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      <div style="width:60px;height:60px;border-radius:50%;background:#e87060;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0;font-family:'DM Serif Display',serif">${iniciales(c.nombre)}</div>
+      <div><div style="font-family:'DM Serif Display',serif;font-size:22px;color:#fff;line-height:1.1">${c.nombre}</div>${c.tel?`<a href="tel:${c.tel}" style="font-size:13px;color:rgba(255,255,255,.65);text-decoration:none;margin-top:3px;display:block">📞 ${c.tel}</a>`:'<div style="font-size:13px;color:rgba(255,255,255,.4);margin-top:3px">Sin teléfono</div>'}${ultimaDir?`<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">📍 ${ultimaDir}</div>`:''}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:#fff">${citas.length}</div><div style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">Citas</div></div>
+      <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:#fff">${pedidos.length}</div><div style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">Pedidos</div></div>
+      <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:${totalSaldo<=0&&totalFacturado>0?'#6ee7b7':totalSaldo>0?'#fca5a5':'#fff'}">${totalSaldo<=0&&totalFacturado>0?'✓':totalSaldo>0?'!':'—'}</div><div style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">Pago</div></div>
+    </div>
+  </div>`;
+
+  if(totalFacturado>0){
+    html+=`<div class="card" style="margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div class="sec-title" style="margin:0">💰 Resumen financiero</div><button class="btn-outline" style="font-size:11px;padding:5px 10px" onclick="descargarPDF('${k}')">📄 PDF</button></div>
+    <div class="info-row"><span class="info-label">Total facturado</span><span class="info-val" style="font-weight:700;font-size:15px;color:var(--blue)">${fmtM(totalFacturado)}</span></div>
+    <div class="info-row"><span class="info-label">Total abonado</span><span class="info-val" style="color:var(--amber);font-weight:600">${fmtM(totalAbonado)}</span></div>
+    <div class="info-row" style="border-bottom:none"><span class="info-label">Saldo pendiente</span><span class="info-val" style="font-weight:700;font-size:15px;color:${totalSaldo<=0?'var(--green)':'var(--red)'}">${totalSaldo<=0?'✓ Pagado al día':fmtM(totalSaldo)}</span></div></div>`;
+  }
+
+  html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 8px"><div class="sec-title" style="margin:0">📋 Historial</div></div>`;
+  html+=sorted.map(x=>{
+    const esCita=x.tipo==='cita';
+    const fecha=esCita?x.fecha:x.fentrega||x.fventa||'';
+    const lbl={pendiente:'Pendiente',confirmada:'Confirmada',entregado:'Entregado',cancelado:'Cancelado'};
+    const bc={pendiente:'pend',confirmada:'conf',entregado:'ent',cancelado:'canc'}[x.estado]||'pend';
+    return`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">${esCita?'📅':'📦'}</span><div><div style="font-size:13px;font-weight:600">${esCita?'Cita':'Pedido'}</div><div style="font-size:11px;color:var(--text3)">${fmt(fecha)||'Sin fecha'}${(esCita?x.hora:x.hentrega)?' · '+(esCita?x.hora:x.hentrega)+'h':''}</div></div></div><span class="badge ${bc}">${lbl[x.estado]}</span></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><button class="btn-outline" style="font-size:11px;padding:4px 8px" onclick="abrirEditar('${x.id}')">✏️ Editar</button>${x.estado==='pendiente'&&esCita?`<button class="btn-green" style="font-size:11px;padding:4px 8px" onclick="cambiarEstado('${x.id}','confirmada')">✓ Confirmar</button>`:''}${x.estado!=='cancelado'&&x.estado!=='entregado'?`<button class="btn-red" style="font-size:11px;padding:4px 8px" onclick="cambiarEstado('${x.id}','cancelado')">Cancelar</button>`:''}</div></div>`;
+  }).join('');
+  if(c.registros.length===0) html+='<div class="empty"><p>Sin registros aún</p></div>';
+  document.getElementById('vista-perfil').innerHTML=html;
+  document.getElementById('vista-perfil').scrollTop=0;
+}
+
+window.volverClientes = function(){perfilActivo=null;renderClientes();}
+
+window.descargarPDF = function(k){
+  const clientes=getClientes();
+  const c=clientes.find(x=>normNom(x.nombre)===k);
+  if(!c) return;
+  const pedidos=c.registros.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado');
+  const totalFacturado=pedidos.reduce((a,x)=>a+(Number(x.total)||0),0);
+  const totalAb1=pedidos.reduce((a,x)=>a+(Number(x.ab1)||0),0);
+  const totalAb2=pedidos.reduce((a,x)=>a+(Number(x.ab2)||0),0);
+  const totalSaldo=pedidos.reduce((a,x)=>a+saldo(x),0);
+  const el=document.getElementById('pdf-preview');
+  const fechaHoy=new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
+  let pedHtml='';
+  pedidos.forEach((x,i)=>{
+    const extras=['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'].filter(ek=>x['x_'+ek]).join(', ');
+    pedHtml+=`<tr><td>${i+1}</td><td>${fmt(x.fventa)||'—'}</td><td>${fmt(x.fentrega)||'—'}</td><td>${x.piedra||'—'}</td><td>${x.melamina||'—'}</td><td>${extras||'—'}</td><td style="text-align:right">${fmtM(x.total)||'—'}</td><td style="text-align:right">${fmtM(x.ab1)||'—'}</td><td style="text-align:right">${fmtM(x.ab2)||'—'}</td><td style="text-align:right;font-weight:600;color:${saldo(x)<=0?'#1a6b4a':'#c0392b'}">${saldo(x)<=0?'Pagado':fmtM(saldo(x))}</td></tr>`;
+  });
+  el.innerHTML=`<div class="pdf-logo"><span>Fig</span>Anzi.</div><div style="font-size:11px;color:#999;margin-bottom:16px">Penco, Biobío · ${fechaHoy}</div><h2 style="font-size:16px;margin-bottom:6px">Ficha: ${c.nombre}</h2>
+  ${pedidos.length>0?`<div class="pdf-section"><h3>Pedidos</h3><table><thead><tr><th>#</th><th>F. Venta</th><th>F. Entrega</th><th>Piedra</th><th>Melamina</th><th>Extras</th><th>Total</th><th>Ab1</th><th>Ab2</th><th>Saldo</th></tr></thead><tbody>${pedHtml}</tbody><tfoot><tr class="total-row"><td colspan="6">TOTALES</td><td>${fmtM(totalFacturado)}</td><td>${fmtM(totalAb1)}</td><td>${fmtM(totalAb2)}</td><td style="color:${totalSaldo<=0?'#1a6b4a':'#c0392b'}">${totalSaldo<=0?'PAGADO':fmtM(totalSaldo)}</td></tr></tfoot></table></div>`:''}
+  <div class="disclaimer">Documento interno FigAnzi. No representa factura formal.</div>`;
+  el.style.display='block';
+  window.print();
+  setTimeout(()=>{el.style.display='none';},1000);
+}
+
+window.abrirEditar = function(id){
+  const x=getData().find(d=>d.id===id);
+  if(!x) return;
+  const esCita=x.tipo==='cita';
+  document.getElementById('modal-title').textContent=esCita?'Editar cita':'Editar pedido';
+  let html=`<div class="form-section"><label>Nombre</label><input type="text" id="e-nom" value="${x.nombre||''}"></div>
+  <div class="row2"><div class="form-section"><label>Teléfono</label><input type="tel" id="e-tel" value="${x.tel||x.telefono||''}"></div><div class="form-section"><label>Dirección</label><input type="text" id="e-dir" value="${x.dir||''}"></div></div>`;
+  if(esCita){
+    html+=`<div class="row2"><div class="form-section"><label>Fecha</label><input type="date" id="e-fecha" value="${x.fecha||''}"></div><div class="form-section"><label>Hora</label><input type="time" id="e-hora" value="${x.hora||''}"></div></div>
+    <div class="form-section"><label>Lugar</label><input type="text" id="e-lcita" value="${x.lcita||''}"></div>
+    <div class="form-section"><label>Qué quiere</label><textarea id="e-qcita">${x.qcita||''}</textarea></div>
+    <div class="form-section"><label>Cotización ($)</label><input type="number" id="e-pcita" value="${x.pcita||''}"></div>
+    <div class="form-section"><label>Notas</label><textarea id="e-ncita">${x.ncita||''}</textarea></div>
+    <div class="form-section"><label>Estado</label><select id="e-estado"><option value="pendiente" ${x.estado==='pendiente'?'selected':''}>Pendiente</option><option value="confirmada" ${x.estado==='confirmada'?'selected':''}>Confirmada</option><option value="cancelado" ${x.estado==='cancelado'?'selected':''}>Cancelado</option></select></div>`;
+  } else {
+    html+=`<div class="row2"><div class="form-section"><label>Fecha venta</label><input type="date" id="e-fventa" value="${x.fventa||''}"></div><div class="form-section"><label>Fecha entrega</label><input type="date" id="e-fentrega" value="${x.fentrega||''}"></div></div>
+    <div class="form-section"><label>Total ($)</label><input type="number" id="e-total" value="${x.total||''}"></div>
+    <div class="row2"><div class="form-section"><label>Abono 1 ($)</label><input type="number" id="e-ab1" value="${x.ab1||''}"></div><div class="form-section"><label>Abono 2 ($)</label><input type="number" id="e-ab2" value="${x.ab2||''}"></div></div>
+    <div class="form-section"><label>Notas</label><textarea id="e-nped">${x.nped||''}</textarea></div>
+    <div class="form-section"><label>Estado</label><select id="e-estado"><option value="pendiente" ${x.estado==='pendiente'?'selected':''}>Pendiente</option><option value="entregado" ${x.estado==='entregado'?'selected':''}>Entregado</option><option value="cancelado" ${x.estado==='cancelado'?'selected':''}>Cancelado</option></select></div>`;
+  }
+  html+=`<div class="btn-row"><button class="btn-main" onclick="guardarEdicion('${id}','${x.tipo}')">Guardar</button><button class="btn-outline" onclick="cerrarModal()">Cancelar</button></div>`;
+  document.getElementById('modal-body').innerHTML=html;
+  document.getElementById('modal-editar').classList.add('open');
+}
+
+window.guardarEdicion = async function(id, tipo){
+  const esCita=tipo==='cita';
+  const datos={nombre: document.getElementById('e-nom').value.trim(), tel: document.getElementById('e-tel').value.trim(), dir: document.getElementById('e-dir').value.trim(), estado: document.getElementById('e-estado').value};
+  if(esCita){
+    Object.assign(datos,{fecha: document.getElementById('e-fecha').value, hora: document.getElementById('e-hora').value, lcita: document.getElementById('e-lcita').value.trim(), qcita: document.getElementById('e-qcita').value.trim(), pcita: document.getElementById('e-pcita').value||null, ncita: document.getElementById('e-ncita').value.trim()});
+  } else {
+    Object.assign(datos,{fventa: document.getElementById('e-fventa').value, fentrega: document.getElementById('e-fentrega').value, total: document.getElementById('e-total').value||null, ab1: document.getElementById('e-ab1').value||null, ab2: document.getElementById('e-ab2').value||null, nped: document.getElementById('e-nped').value.trim()});
+  }
+  try { await saveData(id, datos); cerrarModal(); } catch(e) { alert('Error al guardar.'); }
+}
+
+window.cerrarModal = function(){document.getElementById('modal-editar').classList.remove('open');}
+document.getElementById('modal-editar').addEventListener('click',function(e){if(e.target===this) cerrarModal();});
+
+function actualizarDatalist(){
+  const clientes=getClientes();
+  document.getElementById('clientes-list').innerHTML=clientes.map(c=>`<option value="${c.nombre}">`).join('');
+}
+
+window.guardar = async function(){
+  const nom=document.getElementById('f-nom').value.trim();
+  if(!nom){alert('Ingresa el nombre del cliente.');return;}
+  const base={nombre: nom, tel: document.getElementById('f-tel').value.trim(), dir: document.getElementById('f-dir').value.trim(), tipo: tipoActual, estado: 'pendiente'};
+  if(tipoActual==='cita'){
+    const fecha=document.getElementById('f-fcita').value;
+    if(!fecha){alert('Selecciona la fecha de la cita.');return;}
+    Object.assign(base,{fecha, hora: document.getElementById('f-hcita').value, lcita: document.getElementById('f-lcita').value.trim(), qcita: document.getElementById('f-qcita').value.trim(), pcita: document.getElementById('f-pcita').value||null, piedraC: document.getElementById('f-piedra-c').value.trim(), ncita: document.getElementById('f-ncita').value.trim()});
+  } else {
+    const fe=document.getElementById('f-fentrega').value;
+    if(!fe){alert('Selecciona la propuesta de entrega.');return;}
+    const extras={};
+    ['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'].forEach(ek=>{extras['x_'+ek]=document.getElementById('x-'+ek).checked;});
+    Object.assign(base,{fventa: document.getElementById('f-fventa').value, fentrega: fe, hentrega: document.getElementById('f-hentrega').value, dir2: document.getElementById('f-dir2').value.trim(), piedra: document.getElementById('f-piedra').value, melamina: document.getElementById('f-melamina').value.trim(), croquis: document.getElementById('f-croquis').value.trim(), total: document.getElementById('f-total').value||null, ab1: document.getElementById('f-ab1').value||null, ab2: document.getElementById('f-ab2').value||null, formaPago: document.getElementById('f-pago').value, nped: document.getElementById('f-nped').value.trim(), ...extras});
+  }
   try {
-    if (docId) {
-      // Actualizar existente
-      const { error } = await supabase
-        .from('registros')
-        .update({ datos })
-        .eq('id', docId);
-      if (error) throw error;
-    } else {
-      // Crear nuevo
-      const { data, error } = await supabase
-        .from('registros')
-        .insert({ datos })
-        .select('id')
-        .single();
+    await saveData(null, base);
+    document.querySelectorAll('#p-nuevo input:not([type=checkbox])').forEach(el=>{if(el.type==='time') el.value='10:00';else el.value='';});
+    document.querySelectorAll('#p-nuevo textarea').forEach(el=>el.value='');
+    document.querySelectorAll('#p-nuevo select').forEach(el=>el.value='');
+    document.querySelectorAll('#p-nuevo input[type=checkbox]').forEach(el=>el.checked=false);
+    go('hoy');
+  } catch(e) { alert('Error al guardar.'); }
+}
+
+async function iniciar(){
+  const txt=document.getElementById('loading-overlay').querySelector('.loading-txt');
+  try {
+    txt.textContent='Conectando con Supabase...';
+    await cargarDatos();
+    document.getElementById('loading-overlay').classList.add('hidden');
+    setSyncStatus('ok');
+    renderHoy();
+    actualizarDatalist();
+  } catch(e){
+    console.error(e);
+    txt.textContent='Error: '+(e.message||'Revisa conexión');
+    setSyncStatus('error');
+  }
+}
+
+const ahora=new Date();
+document.getElementById('h-fecha').textContent=ahora.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
+document.getElementById('h-mes').textContent=ahora.toLocaleDateString('es-CL',{month:'long',year:'numeric'}).replace(/^\w/,c=>c.toUpperCase());
+document.getElementById('f-fcita').value=hoy();
+document.getElementById('f-fventa').value=hoy();
+iniciar();
+</script>
+</body>
+</html>
