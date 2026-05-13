@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="FigAnzi">
 <title>FigAnzi</title>
+<script src="gstatic.com"></script>
+<script src="gstatic.com"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
   
@@ -980,6 +982,7 @@ function guardarEdicion(id,tipo){
     });
   }
   saveData(data);
+  db.collection("registros").doc(id).set(x, { merge: true });
   cerrarModal();
   renderHoy();renderCal();
   if(perfilActivo) renderPerfil(perfilActivo);
@@ -989,6 +992,7 @@ function guardarEdicion(id,tipo){
 function eliminarRegistro(id){
   if(!confirm('¿Eliminar este registro permanentemente?')) return;
   const data=getData().filter(x=>x.id!==id);
+  db.collection("registros").doc(id).delete();
   saveData(data);
   cerrarModal();
   renderHoy();renderCal();
@@ -1122,7 +1126,24 @@ function cerrarDetalle() {
     document.getElementById('detalle-cliente').style.display = 'none';
 }
 
-renderHoy();
-</script>
-</body>
-</html>
+1127 renderHoy();
+1128 
+1129 // Conexión en la nube para FigAnzi
+1130 const firebaseConfig = {
+1131   apiKey: "AIzaSyDPpODdKhuj32nctjyp4mp_pHP5B6dFsoQ",
+1132   authDomain: "firebaseapp.com",
+1133   projectId: "figanzi",
+1134   storageBucket: "figanzi.firebasestorage.app",
+1135   messagingSenderId: "963527133698",
+1136   appId: "1:963527133698:web:5dffff5992ee6cc8d5751b",
+1137   measurementId: "G-FRCP46NSCP"
+1138 };
+1139 
+1140 if (!firebase.apps.length) {
+1141     firebase.initializeApp(firebaseConfig);
+1142 }
+1143 const db = firebase.firestore();
+1144 </script>
+1145 </body>
+1146 </html>
+
