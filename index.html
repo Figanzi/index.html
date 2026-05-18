@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -387,29 +387,27 @@ window.selTipo = function(t,el){
   q('bloque-pedido').style.display = t==='pedido'?'block':'none';
 }
 
-// ============ HOY con Dashboard ============
+// ============ HOY con Dashboard CORREGIDO ============
 function renderHoy(){
   const data = getData(), h = hoy();
   const citas = data.filter(x=>x.tipo==='cita'&&x.fecha===h&&x.estado!=='cancelado');
   const entregas = data.filter(x=>x.tipo==='pedido'&&x.fentrega===h&&x.estado==='pendiente');
   const mesActual = mesStr(new Date());
-  const delMes = data.filter(x=>x.tipo==='pedido'&&(x.fventa||'').startsWith(mesActual));
+  const delMes = data.filter(x=>x.tipo==='pedido'&&(x.fventa||'').startsWith(mesActual)&&x.estado!=='cancelado');
   const genMes = delMes.reduce((a,x)=>a+(Number(x.total)||0),0);
   const cobrado = delMes.reduce((a,x)=>a+(Number(x.ab1)||0)+(Number(x.ab2)||0),0);
-  const pendiente = genMes - cobrado;
-  const porCobrar = data.filter(x=>x.tipo==='pedido'&&x.estado==='pendiente').reduce((a,x)=>a+saldo(x),0);
+  // CORRECCIÓN: Por cobrar = TODOS los pedidos no cancelados ni entregados con saldo > 0
+  const porCobrar = data.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado'&&x.estado!=='entregado'&&saldo(x)>0).reduce((a,x)=>a+saldo(x),0);
 
-  // Stats
   q('s-citas').textContent = citas.length;
   q('s-ent').textContent = entregas.length;
   q('s-mes').textContent = '$'+Math.round(genMes).toLocaleString('es-CL');
   q('s-cobrar').textContent = '$'+Math.round(porCobrar).toLocaleString('es-CL');
   
-  // Dashboard
   q('mes-actual-dash').textContent = new Date().toLocaleDateString('es-CL',{month:'long',year:'numeric'});
   q('dash-facturado').textContent = '$'+Math.round(genMes).toLocaleString('es-CL');
   q('dash-cobrado').textContent = '$'+Math.round(cobrado).toLocaleString('es-CL');
-  q('dash-pendiente').textContent = '$'+Math.round(pendiente).toLocaleString('es-CL');
+  q('dash-pendiente').textContent = '$'+Math.round(porCobrar).toLocaleString('es-CL');
 
   const deHoy = [...citas,...entregas].sort((a,b)=>((a.hora||a.hentrega||'')>(b.hora||b.hentrega||''))?1:-1);
   q('lista-hoy').innerHTML = deHoy.length===0 ? '<div class="empty"><div class="empty-icon">🌙</div><p>Sin actividad para hoy</p></div>' : deHoy.map(miniCard).join('');
@@ -525,7 +523,6 @@ function renderClientes(){
   
   let clientes = getClientes();
   
-  // Búsqueda avanzada
   if(busca){
     clientes = clientes.filter(c=>{
       if(c.nombre.toLowerCase().includes(busca)) return true;
@@ -588,11 +585,8 @@ function renderPerfil(k){
   const totalSaldo = pedidos.reduce((a,x)=>a+saldo(x),0);
   const sorted = [...c.registros].sort((a,b)=>(a.tipo==='cita'?a.fecha:a.fentrega||'')>(b.tipo==='cita'?b.fecha:b.fentrega||'')?1:-1);
 
-  // Armar texto para WhatsApp
   let waText = `Hola ${c.nombre}, aquí tu resumen con FigAnzi:%0A%0A`;
-  pedidos.forEach((x,i)=>{
-    waText += `📦 Pedido ${i+1}: ${fmtM(x.total)} | Saldo: ${fmtM(saldo(x))}%0A`;
-  });
+  pedidos.forEach((x,i)=>{ waText += `📦 Pedido ${i+1}: ${fmtM(x.total)} | Saldo: ${fmtM(saldo(x))}%0A`; });
   waText += `%0ATotal: ${fmtM(totalFacturado)} | Saldo: ${fmtM(totalSaldo)}`;
   const waLink = `https://wa.me/${(c.tel||'').replace(/[^0-9]/g,'')}?text=${waText}`;
 
@@ -650,12 +644,12 @@ function renderPerfil(k){
 }
 window.volverClientes = function(){ perfilActivo=null; renderClientes(); }
 
-// ============ DEUDORES ============
+// ============ DEUDORES (CORREGIDO) ============
 window.mostrarDeudores = function(){
   const data = getData();
   const deudores = {};
   data.forEach(x => {
-    if(x.tipo !== 'pedido' || x.estado === 'cancelado') return;
+    if(x.tipo !== 'pedido' || x.estado === 'cancelado' || x.estado === 'entregado') return;
     const s = saldo(x);
     if(s <= 0) return;
     const k = normNom(x.nombre);
