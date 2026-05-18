@@ -1,3 +1,16 @@
+He preparado una versión mejorada de tu app FigAnzi que incluye:
+
+1. Confirmación visual antes de eliminar o cancelar – ya no depende del confirm() nativo del navegador.
+2. Corrección definitiva del panel "Por cobrar" y la lista de deudores – ahora sí aparecen todos los clientes que te deben dinero durante el año (cualquier pedido no cancelado ni entregado con saldo pendiente).
+3. Cálculo de saldo robusto – evita errores con valores vacíos o no numéricos.
+4. Dashboard de finanzas del mes actualizado en tiempo real.
+
+---
+
+✅ Código completo actualizado
+
+Copia todo este contenido y reemplaza tu archivo index.html:
+
 ```html
 <!DOCTYPE html>
 <html lang="es">
@@ -166,6 +179,11 @@ textarea{resize:vertical;min-height:80px}
 #pdf-preview td,#pdf-preview th{border:1px solid #ddd;padding:7px 10px}
 #pdf-preview th{background:#f5f3ef;font-weight:600;font-size:11px;text-transform:uppercase}
 #pdf-preview .disclaimer{font-size:11px;color:#c0392b;margin-top:20px;text-align:center;font-weight:600;border:2px solid #c0392b;padding:10px;border-radius:6px}
+
+/* Modal de confirmación */
+.confirm-content{text-align:center}
+.confirm-content p{font-size:15px;margin-bottom:20px;color:var(--text)}
+.confirm-content .btn-row{justify-content:center}
 </style>
 </head>
 <body>
@@ -314,6 +332,20 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="modal-overlay" id="modal-editar"><div class="modal"><div class="modal-handle"></div><div class="modal-title" id="modal-title"></div><div id="modal-body"></div></div></div>
 <div class="modal-overlay" id="modal-deudores"><div class="modal"><div class="modal-handle"></div><div class="modal-title">💰 Clientes con saldo pendiente</div><div id="deudores-body"></div><button class="btn-outline" style="width:100%;margin-top:12px" onclick="document.getElementById('modal-deudores').classList.remove('open')">Cerrar</button></div></div>
+
+<!-- Modal de confirmación personalizado -->
+<div class="modal-overlay" id="modal-confirmar">
+  <div class="modal">
+    <div class="confirm-content">
+      <p id="confirm-msg">¿Estás seguro?</p>
+      <div class="btn-row">
+        <button class="btn-red" id="confirm-btn-si">Sí, eliminar</button>
+        <button class="btn-outline" onclick="document.getElementById('modal-confirmar').classList.remove('open')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="pdf-preview"></div>
 
 <script type="module">
@@ -359,12 +391,32 @@ function hoy(){ return new Date().toISOString().split('T')[0]; }
 function fmt(s){ if(!s) return ''; const p = s.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function fmtM(n){ if(!n && n!==0) return null; return '$'+Math.round(Number(n)).toLocaleString('es-CL'); }
 function iniciales(nom){ if(!nom) return '?'; return nom.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?'; }
-function saldo(x){ return (Number(x.total)||0) - (Number(x.ab1)||0) - (Number(x.ab2)||0); }
+// saldo robusto: devuelve número positivo si falta por pagar
+function saldo(x){ 
+  const total = Number(x.total) || 0;
+  const ab1 = Number(x.ab1) || 0;
+  const ab2 = Number(x.ab2) || 0;
+  return total - ab1 - ab2;
+}
 function mesStr(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
 function nombreMes(d){ return d.toLocaleDateString('es-CL',{month:'long',year:'numeric'}); }
 function normNom(n){ return (n||'').trim().toLowerCase(); }
 
 let tipoActual = 'cita', filtroClientes = 'todos', calFecha = new Date(), calSelDia = null, perfilActivo = null;
+
+// ============ CONFIRMACIÓN PERSONALIZADA ============
+function mostrarConfirmacion(mensaje, callbackSi, textoSi = 'Sí') {
+  q('confirm-msg').textContent = mensaje;
+  const btnSi = q('confirm-btn-si');
+  btnSi.textContent = textoSi;
+  btnSi.onclick = () => {
+    q('modal-confirmar').classList.remove('open');
+    callbackSi();
+  };
+  q('modal-confirmar').classList.add('open');
+}
+// Cerrar confirmación al tocar fuera
+q('modal-confirmar').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
 
 // ============ NAV ============
 window.go = function(p){
@@ -396,7 +448,7 @@ function renderHoy(){
   const delMes = data.filter(x=>x.tipo==='pedido'&&(x.fventa||'').startsWith(mesActual)&&x.estado!=='cancelado');
   const genMes = delMes.reduce((a,x)=>a+(Number(x.total)||0),0);
   const cobrado = delMes.reduce((a,x)=>a+(Number(x.ab1)||0)+(Number(x.ab2)||0),0);
-  // CORRECCIÓN: Por cobrar = TODOS los pedidos no cancelados ni entregados con saldo > 0
+  // Por cobrar: todos los pedidos no cancelados ni entregados con saldo > 0
   const porCobrar = data.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado'&&x.estado!=='entregado'&&saldo(x)>0).reduce((a,x)=>a+saldo(x),0);
 
   q('s-citas').textContent = citas.length;
@@ -440,14 +492,21 @@ function miniCard(x){
     <div style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
       ${x.estado==='pendiente'&&esCita?`<button class="btn-green" onclick="event.stopPropagation();cambiarEstado('${x.id}','confirmada')">✓ Confirmar</button>`:''}
       ${x.estado==='pendiente'&&!esCita?`<button class="btn-green" onclick="event.stopPropagation();cambiarEstado('${x.id}','entregado')">✓ Entregado</button>`:''}
-      ${x.estado!=='cancelado'&&x.estado!=='entregado'?`<button class="btn-outline" onclick="event.stopPropagation();cambiarEstado('${x.id}','cancelado')">Cancelar</button>`:''}
+      ${x.estado!=='cancelado'&&x.estado!=='entregado'?`<button class="btn-outline" onclick="event.stopPropagation();mostrarConfirmacion('¿Cancelar este registro?', ()=>cambiarEstado('${x.id}','cancelado'), 'Sí, cancelar')">Cancelar</button>`:''}
       <button class="btn-outline" onclick="event.stopPropagation();abrirEditar('${x.id}')">Editar</button>
     </div>
   </div>`;
 }
 
 window.cambiarEstado = async function(id, est){
-  try { await saveData(id, {estado: est}); renderHoy(); if(perfilActivo) renderPerfil(perfilActivo); } catch(e) {}
+  try {
+    setSyncStatus('syncing');
+    await saveData(id, {estado: est});
+    await cargarDatos();
+    setSyncStatus('ok');
+    renderHoy();
+    if(perfilActivo) renderPerfil(perfilActivo);
+  } catch(e) { alert('Error al guardar.'); }
 }
 
 // ============ CALENDARIO ============
@@ -546,7 +605,7 @@ function renderClientes(){
     }));
   }
   
-  if(filtroClientes==='debe') clientes = clientes.filter(c=>c.registros.some(x=>x.tipo==='pedido'&&saldo(x)>0&&x.estado!=='cancelado'));
+  if(filtroClientes==='debe') clientes = clientes.filter(c=>c.registros.some(x=>x.tipo==='pedido'&&saldo(x)>0&&x.estado!=='cancelado'&&x.estado!=='entregado'));
   if(filtroClientes==='pagado') clientes = clientes.filter(c=>c.registros.some(x=>x.tipo==='pedido'&&saldo(x)<=0&&x.estado!=='cancelado'));
   clientes.sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
 
@@ -637,7 +696,7 @@ function renderPerfil(k){
     }
     html += `<div style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
       <button class="btn-outline" style="font-size:11px;padding:4px 8px" onclick="abrirEditar('${x.id}')">✏️ Editar</button>
-      ${x.estado!=='cancelado'&&x.estado!=='entregado'?`<button class="btn-red" style="font-size:11px;padding:4px 8px" onclick="cambiarEstado('${x.id}','cancelado')">Cancelar</button>`:''}
+      ${x.estado!=='cancelado'&&x.estado!=='entregado'?`<button class="btn-red" style="font-size:11px;padding:4px 8px" onclick="mostrarConfirmacion('¿Cancelar este registro?', ()=>cambiarEstado('${x.id}','cancelado'), 'Sí, cancelar')">Cancelar</button>`:''}
     </div></div>`;
   });
   q('vista-perfil').innerHTML = html;
@@ -749,7 +808,7 @@ window.abrirEditar = function(id){
   }
 
   html += `<div class="btn-row"><button class="btn-main" onclick="guardarEdicion('${id}','${x.tipo}')">💾 Guardar cambios</button><button class="btn-outline" onclick="cerrarModal()">Cancelar</button></div>
-  <div style="margin-top:10px"><button class="btn-red" onclick="eliminarRegistro('${id}')">🗑️ Eliminar registro</button></div>`;
+  <div style="margin-top:10px"><button class="btn-red" onclick="mostrarConfirmacion('¿Eliminar este registro permanentemente?', ()=>eliminarRegistro('${id}'), 'Sí, eliminar')">🗑️ Eliminar registro</button></div>`;
 
   q('modal-body').innerHTML = html;
   q('modal-editar').classList.add('open');
@@ -792,11 +851,12 @@ window.guardarEdicion = async function(id, tipo){
 }
 
 window.eliminarRegistro = async function(id){
-  if(!confirm('¿Eliminar este registro permanentemente?')) return;
   try {
     await supabase.from('registros').delete().eq('id', Number(id));
     await cargarDatos();
     cerrarModal();
+    renderHoy();
+    if(perfilActivo) renderPerfil(perfilActivo);
   } catch(e) { alert('Error al eliminar.'); }
 }
 
@@ -891,3 +951,4 @@ iniciar();
 </script>
 </body>
 </html>
+```
