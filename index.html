@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<!-- PWA Meta Tags -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="FigAnzi">
@@ -12,10 +11,7 @@
 <meta name="theme-color" content="#1a1714">
 <meta name="description" content="Gestión de citas y pedidos para muebles y mesones">
 
-<!-- PWA Manifest -->
 <link rel="manifest" href="manifest.json">
-
-<!-- Apple Touch Icons -->
 <link rel="apple-touch-icon" sizes="180x180" href="icon-512.png">
 <link rel="apple-touch-startup-image" href="icon-512.png">
 
@@ -462,12 +458,10 @@ function mostrarConfirmacion(mensaje, callbackSi, textoSi = 'Sí') {
   q('modal-confirmar').classList.add('open');
 }
 
-// Cerrar modal al tocar fuera
 q('modal-confirmar').addEventListener('click', function(e){ 
   if(e.target === this) this.classList.remove('open'); 
 });
 
-// Botón Cancelar del modal
 q('confirm-btn-no').addEventListener('click', function(){
   q('modal-confirmar').classList.remove('open');
 });
@@ -887,7 +881,7 @@ window.abrirEditar = function(id){
   }
 
   html += `<div style="display:flex;gap:8px;margin-top:12px"><button class="btn-main" style="flex:1" onclick="guardarEdicion('${id}','${x.tipo}')">💾 Guardar</button><button class="btn-outline" onclick="cerrarModal()">Cancelar</button></div>
-  <div style="margin-top:10px"><button class="btn-red" onclick="mostrarConfirmacion('¿Eliminar este registro permanentemente?', ()=>eliminarRegistro('${id}'), 'Sí, eliminar')">🗑️ Eliminar registro</button></div>`;
+  <div style="margin-top:10px"><button class="btn-red btn-eliminar-registro" data-id="${id}">🗑️ Eliminar registro</button></div>`;
 
   q('modal-body').innerHTML = html;
   q('modal-editar').classList.add('open');
@@ -949,6 +943,15 @@ window.eliminarRegistro = async function(id){
 
 window.cerrarModal = function(){ q('modal-editar').classList.remove('open'); }
 q('modal-editar').addEventListener('click', function(e){ if(e.target===this) cerrarModal(); });
+
+// Botón eliminar registro dentro del modal (event delegation)
+q('modal-body').addEventListener('click', function(e){
+  const btn = e.target.closest('.btn-eliminar-registro');
+  if(btn){
+    const id = btn.dataset.id;
+    mostrarConfirmacion('¿Eliminar este registro permanentemente?', ()=>eliminarRegistro(id), 'Sí, eliminar');
+  }
+});
 
 // ============ GUARDAR NUEVO ============
 function actualizarDatalist(){
