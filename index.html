@@ -779,7 +779,7 @@ function renderPerfil(k){
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-weight:600">${esCita?'📅 Cita':'📦 Pedido'}</span><span class="badge ${({pendiente:'pend',confirmada:'conf',entregado:'ent',cancelado:'canc'})[x.estado]||'pend'}">${x.estado||'pendiente'}</span></div>`;
     if(esCita){
       html += `<div class="info-row"><span class="info-label">Fecha</span><span class="info-val">${fmt(x.fecha)} ${x.hora||''}</span></div>
-      ${x.lcita?`<div class="info-row"><span class="info-label">Lugar</span><span class="info-val">${x.lcita}</span></div>`:''}
+      <div class="info-row"><span class="info-label">Lugar</span><span class="info-val">${x.lcita || '—'}</span></div>
       ${x.qcita?`<div class="info-row"><span class="info-label">Qué quiere</span><span class="info-val">${x.qcita}</span></div>`:''}
       ${x.piedraC?`<div class="info-row"><span class="info-label">Piedra</span><span class="info-val">${x.piedraC}</span></div>`:''}
       ${x.pcita?`<div class="info-row"><span class="info-label">Cotización</span><span class="info-val" style="font-weight:600">${fmtM(x.pcita)}</span></div>`:''}
