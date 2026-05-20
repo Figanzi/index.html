@@ -35,7 +35,7 @@ self.addEventListener('fetch', e => {
     return;
   }
   
-  // Estrategia Cache First para fuentes de Google
+  // Cache First para fuentes de Google
   if (e.request.url.includes('fonts.googleapis.com') || e.request.url.includes('fonts.gstatic.com')) {
     e.respondWith(
       caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
@@ -45,7 +45,7 @@ self.addEventListener('fetch', e => {
     return;
   }
   
-  // Estrategia Network First para el resto
+  // Network First para el resto
   e.respondWith(
     fetch(e.request).then(res => {
       if (res.ok) {
