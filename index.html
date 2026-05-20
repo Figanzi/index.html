@@ -561,8 +561,6 @@ window.cambiarEstado = async function(id, est){
 }
 
 // ============ CALENDARIO ============
-window.calNav = function(dir){ calFecha = new Date(calFecha.getFullYear(), calFecha.getMonth()+dir, 1); calSelDia = null; renderCal(); }
-
 function renderCal(){
   const data = getData();
   q('cal-titulo').textContent = nombreMes(calFecha).replace(/^\w/,c=>c.toUpperCase());
@@ -578,39 +576,45 @@ function renderCal(){
     const f = x.tipo==='cita'?x.fecha:x.fentrega;
     return f && f.startsWith(mesActual) && x.estado!=='cancelado';
   });
+  
   const hoyS = hoy();
   let html = ['Lu','Ma','Mi','Ju','Vi','Sá','Do'].map(n=>`<div class="cal-day-name">${n}</div>`).join('');
 
   dias.forEach(({fecha,otroMes})=>{
     const fs = fecha.toISOString().split('T')[0];
-    const tieneCitas = eventosDelMes.filter(x=>x.tipo==='cita'&&x.fecha===fs).length > 0;
-    const tienePedidos = eventosDelMes.filter(x=>x.tipo==='pedido'&&x.fentrega===fs).length > 0;
+    const numCitas = eventosDelMes.filter(x=>x.tipo==='cita'&&x.fecha===fs).length;
+    const numPedidos = eventosDelMes.filter(x=>x.tipo==='pedido'&&x.fentrega===fs).length;
     const isHoy = fs===hoyS, isSel = fs===calSelDia;
-    const cls = ['cal-day', otroMes?'other-month':'', isHoy?'today':'', isSel&&!isHoy?'selected':'', (tieneCitas||tienePedidos)?'has-event':''].filter(Boolean).join(' ');
-    html += `<div class="${cls}" onclick="selDiaCal('${fs}')" style="position:relative">
-  <span style="position:relative;z-index:1">${fecha.getDate()}</span>
-  ${(tieneCitas||tienePedidos) ? `
-    <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);display:flex;gap:3px">
-      ${tieneCitas ? `<div style="width:7px;height:7px;border-radius:50%;background:#c0392b" title="Cita"></div>` : ''}
-      ${tienePedidos ? `<div style="width:7px;height:7px;border-radius:50%;background:#1a3a6b" title="Entrega"></div>` : ''}
-    </div>
-  ` : ''}
-</div>`;
-
+    
+    // Determinar color de fondo
+    let bgStyle = '';
+    if(numCitas > 0 && numPedidos > 0) bgStyle = 'background:#e8d5f5;'; // morado claro = ambos
+    else if(numCitas > 0) bgStyle = 'background:#fdf0ef;'; // rojo claro = citas
+    else if(numPedidos > 0) bgStyle = 'background:#eef7f2;'; // verde claro = entregas
+    
+    if(isHoy) bgStyle = 'background:#1a1714;color:#fff;';
+    if(isSel && !isHoy) bgStyle = 'background:#c0392b;color:#fff;';
+    
+    const cls = ['cal-day', otroMes?'other-month':'', isHoy?'today':'', isSel&&!isHoy?'selected':'', (numCitas+numPedidos)>0?'has-event':''].filter(Boolean).join(' ');
+    
+    html += `<div class="${cls}" onclick="selDiaCal('${fs}')" style="${bgStyle}min-height:42px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:600;font-size:13px">
+      ${fecha.getDate()}
+      ${(numCitas+numPedidos) > 0 && !isHoy ? `<div style="font-size:8px;opacity:.7;margin-top:1px">${numCitas>0?'📅'+numCitas:''}${numPedidos>0?' 📦'+numPedidos:''}</div>` : ''}
+      ${(numCitas+numPedidos) > 0 && isHoy ? `<div style="font-size:8px;opacity:.7;margin-top:1px">${numCitas>0?'📅'+numCitas:''}${numPedidos>0?' 📦'+numPedidos:''}</div>` : ''}
+    </div>`;
   });
   q('cal-grid').innerHTML = html;
 
   if(calSelDia){
     const evsDia = eventosDelMes.filter(x=>(x.tipo==='cita'?x.fecha:x.fentrega)===calSelDia);
     q('cal-sel-titulo').textContent = `Eventos del ${fmt(calSelDia)}`;
-    q('cal-events').innerHTML = evsDia.length===0 ? '<div class="empty"><p>Sin eventos ese día</p></div>' : evsDia.map(miniCard).join('');
+    q('cal-events').innerHTML = evsDia.length===0 ? '<div class="empty"><p>Sin eventos</p></div>' : evsDia.map(miniCard).join('');
   } else {
     q('cal-sel-titulo').textContent = 'Todos los eventos del mes';
     const todos = [...eventosDelMes].sort((a,b)=>(a.tipo==='cita'?a.fecha:a.fentrega)>(b.tipo==='cita'?b.fecha:b.fentrega)?1:-1);
-    q('cal-events').innerHTML = todos.length===0 ? '<div class="empty"><p>Sin eventos este mes</p></div>' : todos.map(miniCard).join('');
+    q('cal-events').innerHTML = todos.length===0 ? '<div class="empty"><p>Sin eventos</p></div>' : todos.map(miniCard).join('');
   }
 }
-window.selDiaCal = function(fs){ calSelDia = calSelDia===fs ? null : fs; renderCal(); }
 
 // ============ CLIENTES ============
 function getClientes(){
