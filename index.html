@@ -3,14 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<!-- PWA Meta Tags -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="FigAnzi">
-<title>FigAnzi</title>
-<link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>📐</text></svg>">
-<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a1714">
+<meta name="description" content="Gestión de citas y pedidos para muebles y mesones">
 
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+
+<!-- Apple Touch Icons -->
+<link rel="apple-touch-icon" sizes="180x180" href="icon-512.png">
+<link rel="apple-touch-startup-image" href="icon-512.png">
+
+<!-- Splash screens iOS (portrait) -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<title>FigAnzi</title>
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap">
+
+<style>
 :root{
   --bg:#f5f3ef;
   --surface:#ffffff;
@@ -157,6 +175,14 @@ textarea{resize:vertical;min-height:80px}
 .empty-icon{font-size:36px;margin-bottom:8px}
 .empty p{font-size:14px}
 
+/* Banner de instalación PWA */
+.pwa-banner{display:none;background:var(--text);color:#fff;padding:12px 16px;margin-bottom:12px;border-radius:var(--radius-sm);align-items:center;gap:10px}
+.pwa-banner.show{display:flex}
+.pwa-banner p{flex:1;font-size:12px;line-height:1.4}
+.pwa-banner strong{display:block;font-size:13px;margin-bottom:2px}
+.pwa-banner-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:18px;cursor:pointer;padding:0 4px}
+.pwa-install-btn{background:#e87060;color:#fff;border:none;padding:7px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif}
+
 @media print{.app,.nav,.header{display:none!important}#pdf-preview{display:block!important}}
 #pdf-preview{display:none;padding:20px;font-family:'DM Sans',sans-serif;color:#1a1714;max-width:800px;margin:0 auto}
 #pdf-preview .pdf-logo{font-family:serif;font-size:28px;font-weight:700;margin-bottom:4px}
@@ -166,7 +192,6 @@ textarea{resize:vertical;min-height:80px}
 #pdf-preview th{background:#f5f3ef;font-weight:600;font-size:11px;text-transform:uppercase}
 #pdf-preview .disclaimer{font-size:11px;color:#c0392b;margin-top:20px;text-align:center;font-weight:600;border:2px solid #c0392b;padding:10px;border-radius:6px}
 
-/* Modal de confirmación */
 .confirm-content{text-align:center}
 .confirm-content p{font-size:15px;margin-bottom:20px;color:var(--text)}
 .confirm-content .btn-row{justify-content:center}
@@ -177,7 +202,7 @@ textarea{resize:vertical;min-height:80px}
 <div class="loading-overlay" id="loading-overlay">
   <div class="loading-logo"><span>Fig</span>Anzi.</div>
   <div class="spinner"></div>
-  <div class="loading-txt">Conectando con Supabase…</div>
+  <div class="loading-txt" id="loading-txt">Conectando con Supabase…</div>
 </div>
 
 <div class="app">
@@ -195,9 +220,16 @@ textarea{resize:vertical;min-height:80px}
 
   <div class="content">
     <div class="pane active" id="p-hoy">
+      <!-- Banner PWA instalación -->
+      <div class="pwa-banner" id="pwa-banner">
+        <div style="font-size:24px">📲</div>
+        <p><strong>Instalar FigAnzi</strong>Agrégala a tu pantalla de inicio para usarla como app</p>
+        <button class="pwa-install-btn" id="pwa-install-btn">Instalar</button>
+        <button class="pwa-banner-close" id="pwa-banner-close">✕</button>
+      </div>
+
       <div id="aviso-hoy" class="aviso" style="display:none"><strong>☀️ Buenos días</strong><p id="aviso-txt"></p></div>
       
-      <!-- DASHBOARD DE GANANCIAS -->
       <div class="card" style="margin-bottom:12px;background:var(--text);color:#fff;border:none">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <span style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.5px">📊 Finanzas del mes</span>
@@ -319,12 +351,11 @@ textarea{resize:vertical;min-height:80px}
 <div class="modal-overlay" id="modal-editar"><div class="modal"><div class="modal-handle"></div><div class="modal-title" id="modal-title"></div><div id="modal-body"></div></div></div>
 <div class="modal-overlay" id="modal-deudores"><div class="modal"><div class="modal-handle"></div><div class="modal-title">💰 Clientes con saldo pendiente</div><div id="deudores-body"></div><button class="btn-outline" style="width:100%;margin-top:12px" onclick="document.getElementById('modal-deudores').classList.remove('open')">Cerrar</button></div></div>
 
-<!-- Modal de confirmación personalizado -->
 <div class="modal-overlay" id="modal-confirmar">
   <div class="modal">
     <div class="confirm-content">
       <p id="confirm-msg">¿Estás seguro?</p>
-      <div class="btn-row">
+      <div class="btn-row" style="display:flex;gap:10px;justify-content:center">
         <button class="btn-red" id="confirm-btn-si">Sí, eliminar</button>
         <button class="btn-outline" onclick="document.getElementById('modal-confirmar').classList.remove('open')">Cancelar</button>
       </div>
@@ -377,7 +408,6 @@ function hoy(){ return new Date().toISOString().split('T')[0]; }
 function fmt(s){ if(!s) return ''; const p = s.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function fmtM(n){ if(!n && n!==0) return null; return '$'+Math.round(Number(n)).toLocaleString('es-CL'); }
 function iniciales(nom){ if(!nom) return '?'; return nom.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?'; }
-// saldo robusto: devuelve número positivo si falta por pagar
 function saldo(x){ 
   const total = Number(x.total) || 0;
   const ab1 = Number(x.ab1) || 0;
@@ -390,7 +420,44 @@ function normNom(n){ return (n||'').trim().toLowerCase(); }
 
 let tipoActual = 'cita', filtroClientes = 'todos', calFecha = new Date(), calSelDia = null, perfilActivo = null;
 
-// ============ CONFIRMACIÓN PERSONALIZADA ============
+// ============ PWA ============
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Mostrar banner solo si no fue descartado antes
+  if(!localStorage.getItem('pwa-dismissed')) {
+    q('pwa-banner').classList.add('show');
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  q('pwa-banner').classList.remove('show');
+  deferredPrompt = null;
+});
+
+q('pwa-install-btn').addEventListener('click', async () => {
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if(outcome === 'accepted') q('pwa-banner').classList.remove('show');
+  deferredPrompt = null;
+});
+
+q('pwa-banner-close').addEventListener('click', () => {
+  q('pwa-banner').classList.remove('show');
+  localStorage.setItem('pwa-dismissed', '1');
+});
+
+// Registrar Service Worker
+if('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
+  });
+}
+
+// ============ CONFIRMACIÓN ============
 function mostrarConfirmacion(mensaje, callbackSi, textoSi = 'Sí') {
   q('confirm-msg').textContent = mensaje;
   const btnSi = q('confirm-btn-si');
@@ -401,7 +468,6 @@ function mostrarConfirmacion(mensaje, callbackSi, textoSi = 'Sí') {
   };
   q('modal-confirmar').classList.add('open');
 }
-// Cerrar confirmación al tocar fuera
 q('modal-confirmar').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
 
 // ============ NAV ============
@@ -425,7 +491,7 @@ window.selTipo = function(t,el){
   q('bloque-pedido').style.display = t==='pedido'?'block':'none';
 }
 
-// ============ HOY con Dashboard CORREGIDO ============
+// ============ HOY ============
 function renderHoy(){
   const data = getData(), h = hoy();
   const citas = data.filter(x=>x.tipo==='cita'&&x.fecha===h&&x.estado!=='cancelado');
@@ -434,7 +500,6 @@ function renderHoy(){
   const delMes = data.filter(x=>x.tipo==='pedido'&&(x.fventa||'').startsWith(mesActual)&&x.estado!=='cancelado');
   const genMes = delMes.reduce((a,x)=>a+(Number(x.total)||0),0);
   const cobrado = delMes.reduce((a,x)=>a+(Number(x.ab1)||0)+(Number(x.ab2)||0),0);
-  // Por cobrar: todos los pedidos no cancelados ni entregados con saldo > 0
   const porCobrar = data.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado'&&x.estado!=='entregado'&&saldo(x)>0).reduce((a,x)=>a+saldo(x),0);
 
   q('s-citas').textContent = citas.length;
@@ -484,15 +549,18 @@ function miniCard(x){
   </div>`;
 }
 
+// ============ CAMBIAR ESTADO — CORREGIDO (fusiona con datos originales) ============
 window.cambiarEstado = async function(id, est){
   try {
     setSyncStatus('syncing');
-    await saveData(id, {estado: est});
-    await cargarDatos();
+    const original = _cache.find(d => d.id === id);
+    if(!original) throw new Error('Registro no encontrado');
+    const { id: _id, ...datosOriginales } = original;
+    await saveData(id, { ...datosOriginales, estado: est });
     setSyncStatus('ok');
     renderHoy();
     if(perfilActivo) renderPerfil(perfilActivo);
-  } catch(e) { alert('Error al guardar.'); }
+  } catch(e) { setSyncStatus('error'); alert('Error al guardar: ' + e.message); }
 }
 
 // ============ CALENDARIO ============
@@ -538,7 +606,7 @@ function renderCal(){
 }
 window.selDiaCal = function(fs){ calSelDia = calSelDia===fs ? null : fs; renderCal(); }
 
-// ============ CLIENTES con búsqueda avanzada ============
+// ============ CLIENTES ============
 function getClientes(){
   const map = {};
   getData().forEach(x=>{
@@ -689,7 +757,7 @@ function renderPerfil(k){
 }
 window.volverClientes = function(){ perfilActivo=null; renderClientes(); }
 
-// ============ DEUDORES (CORREGIDO) ============
+// ============ DEUDORES ============
 window.mostrarDeudores = function(){
   const data = getData();
   const deudores = {};
@@ -756,7 +824,7 @@ window.descargarPDF = function(k){
     <div style="display:flex;justify-content:space-between;margin-top:4px"><span>TOTAL ABONADO</span><span style="color:#8a5a00">${fmtM(totalAbonado)}</span></div>
     <div style="display:flex;justify-content:space-between;font-weight:700;margin-top:4px"><span>SALDO</span><span style="color:${totalSaldo<=0?'#1a6b4a':'#c0392b'}">${totalSaldo<=0?'✓ PAGADO':fmtM(totalSaldo)}</span></div>
   </div>
-  <div class="disclaimer">⚠️ Este documento NO es una boleta o factura oficial. Es solo para uso informativo interno de FigAnzi. Los precios, materiales y fechas están sujetos a cambios sin previo aviso.</div>`;
+  <div class="disclaimer">⚠️ Este documento NO es una boleta o factura oficial. Es solo para uso informativo interno de FigAnzi.</div>`;
 
   el.innerHTML = html; el.style.display = 'block'; window.print();
   setTimeout(()=>{ el.style.display = 'none'; }, 1000);
@@ -793,13 +861,14 @@ window.abrirEditar = function(id){
     <div class="form-section"><label>Estado</label><select id="e-estado"><option value="pendiente" ${x.estado==='pendiente'?'selected':''}>Pendiente</option><option value="entregado" ${x.estado==='entregado'?'selected':''}>Entregado</option><option value="cancelado" ${x.estado==='cancelado'?'selected':''}>Cancelado</option></select></div>`;
   }
 
-  html += `<div class="btn-row"><button class="btn-main" onclick="guardarEdicion('${id}','${x.tipo}')">💾 Guardar cambios</button><button class="btn-outline" onclick="cerrarModal()">Cancelar</button></div>
+  html += `<div style="display:flex;gap:8px;margin-top:12px"><button class="btn-main" style="flex:1" onclick="guardarEdicion('${id}','${x.tipo}')">💾 Guardar</button><button class="btn-outline" onclick="cerrarModal()">Cancelar</button></div>
   <div style="margin-top:10px"><button class="btn-red" onclick="mostrarConfirmacion('¿Eliminar este registro permanentemente?', ()=>eliminarRegistro('${id}'), 'Sí, eliminar')">🗑️ Eliminar registro</button></div>`;
 
   q('modal-body').innerHTML = html;
   q('modal-editar').classList.add('open');
 }
 
+// ============ GUARDAR EDICIÓN — CORREGIDO (fusiona con datos originales) ============
 window.guardarEdicion = async function(id, tipo){
   const esCita = tipo==='cita';
   const datos = {
@@ -833,7 +902,15 @@ window.guardarEdicion = async function(id, tipo){
       datos['x_'+btn.textContent.trim().toLowerCase()] = btn.classList.contains('sel');
     });
   }
-  try { await saveData(id, datos); cerrarModal(); } catch(e) { alert('Error al guardar.'); }
+  try {
+    // Fusionar con datos originales para no perder el campo 'tipo' ni otros
+    const original = _cache.find(d => d.id === id);
+    const { id: _id, ...datosOriginales } = original || {};
+    await saveData(id, { ...datosOriginales, ...datos });
+    cerrarModal();
+    renderHoy();
+    if(perfilActivo) renderPerfil(perfilActivo);
+  } catch(e) { setSyncStatus('error'); alert('Error al guardar: ' + e.message); }
 }
 
 window.eliminarRegistro = async function(id){
@@ -891,9 +968,10 @@ window.guardar = async function(){
     base.ab2 = q('f-ab2')?.value || null;
     base.formaPago = q('f-pago')?.value || '';
     base.nped = qv('f-nped');
-    const nombres = ['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'];
+    const nombres = ['enchufe','lavaplatos','gas','horno micr.','agua','campana','piedra','copero','post','península'];
+    const claves =  ['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'];
     document.querySelectorAll('#extras-grid .extra-btn').forEach((btn,i)=>{
-      base['x_'+nombres[i]] = btn.classList.contains('sel');
+      base['x_'+claves[i]] = btn.classList.contains('sel');
     });
   }
   
@@ -911,7 +989,7 @@ window.guardar = async function(){
 
 // ============ INIT ============
 async function iniciar(){
-  const txt = document.querySelector('.loading-txt');
+  const txt = q('loading-txt');
   const overlay = q('loading-overlay');
   try {
     if(txt) txt.textContent = 'Conectando...';
@@ -937,4 +1015,3 @@ iniciar();
 </script>
 </body>
 </html>
-```
