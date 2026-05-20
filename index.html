@@ -303,11 +303,32 @@ textarea{resize:vertical;min-height:80px}
         <div class="row2"><div class="form-section"><label>Cotización ($)</label><input type="number" id="f-pcita" placeholder="0"></div><div class="form-section"><label>Tipo piedra</label><input type="text" id="f-piedra-c" placeholder="Granito,cuarzo, mármol..."></div></div>
         <div class="form-section"><label>Notas</label><textarea id="f-ncita" rows="2"></textarea></div>
       </div>
+      
       <div id="bloque-pedido" style="display:none">
-        <div style="height:1px;background:var(--border);margin:4px 0 14px"></div>
-        <div class="row2"><div class="form-section"><label>Piedra</label><select id="f-piedra"><option value="">Sin piedra</option><option>Granito</option><option>Cuarzo</option><option>Laminato</option><option>Posformado</option><option>Por definir</option></select></div><div class="form-section"><label>Tipo de Piedra/label><input type="text" id="f-Tipo de Piedra " placeholder="Ej: Calacata, Negro san Gabriel..."></div></div>
-        </div><div class="form-section"><label>Melamina</label><input type="text" id="f-melamina" placeholder="Ej: Grafito, Blanco..."></div></div>
-        <div class="form-section"><label>Extras incluidos</label><div class="check-grid" id="extras-grid">
+  <div style="height:1px;background:var(--border);margin:4px 0 14px"></div>
+  
+  <div class="row2">
+    <div class="form-section">
+      <label>Piedra</label>
+      <select id="f-piedra">
+        <option value="">Sin piedra</option>
+        <option>Granito</option>
+        <option>Cuarzo</option>
+        <option>Laminato</option>
+        <option>Posformado</option>
+        <option>Por definir</option>
+      </select>
+    </div>
+    <div class="form-section">
+      <label>Tipo de Piedra</label>
+      <input type="text" id="f-tipo-piedra" placeholder="Ej: Calacata, Negro San Gabriel...">
+    </div>
+  </div>
+  
+  <div class="form-section">
+    <label>Melamina</label>
+    <input type="text" id="f-melamina" placeholder="Ej: Grafito, Blanco...">
+  </div>
           <button type="button" class="extra-btn" onclick="this.classList.toggle('sel')">Enchufe</button>
           <button type="button" class="extra-btn" onclick="this.classList.toggle('sel')">Lavaplatos</button>
           <button type="button" class="extra-btn" onclick="this.classList.toggle('sel')">Gas</button>
