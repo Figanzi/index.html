@@ -587,7 +587,16 @@ function renderCal(){
     const tienePedidos = eventosDelMes.filter(x=>x.tipo==='pedido'&&x.fentrega===fs).length > 0;
     const isHoy = fs===hoyS, isSel = fs===calSelDia;
     const cls = ['cal-day', otroMes?'other-month':'', isHoy?'today':'', isSel&&!isHoy?'selected':'', (tieneCitas||tienePedidos)?'has-event':''].filter(Boolean).join(' ');
-    html += `<div class="${cls}" onclick="selDiaCal('${fs}')">${fecha.getDate()}${tieneCitas&&!isHoy?`<div class="dot" style="background:var(--red)"></div>`:''}${tienePedidos&&!tieneCitas&&!isHoy?`<div class="dot" style="background:var(--blue)"></div>`:''}${(tieneCitas||tienePedidos)&&isHoy?`<div class="dot" style="background:#fff"></div>`:''}</div>`;
+    html += `<div class="${cls}" onclick="selDiaCal('${fs}')" style="position:relative">
+  <span style="position:relative;z-index:1">${fecha.getDate()}</span>
+  ${(tieneCitas||tienePedidos) ? `
+    <div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);display:flex;gap:3px">
+      ${tieneCitas ? `<div style="width:7px;height:7px;border-radius:50%;background:#c0392b" title="Cita"></div>` : ''}
+      ${tienePedidos ? `<div style="width:7px;height:7px;border-radius:50%;background:#1a3a6b" title="Entrega"></div>` : ''}
+    </div>
+  ` : ''}
+</div>`;
+
   });
   q('cal-grid').innerHTML = html;
 
