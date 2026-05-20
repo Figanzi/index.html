@@ -19,9 +19,6 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icon-512.png">
 <link rel="apple-touch-startup-image" href="icon-512.png">
 
-<!-- Splash screens iOS (portrait) -->
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 <title>FigAnzi</title>
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -175,7 +172,6 @@ textarea{resize:vertical;min-height:80px}
 .empty-icon{font-size:36px;margin-bottom:8px}
 .empty p{font-size:14px}
 
-/* Banner de instalación PWA */
 .pwa-banner{display:none;background:var(--text);color:#fff;padding:12px 16px;margin-bottom:12px;border-radius:var(--radius-sm);align-items:center;gap:10px}
 .pwa-banner.show{display:flex}
 .pwa-banner p{flex:1;font-size:12px;line-height:1.4}
@@ -220,7 +216,6 @@ textarea{resize:vertical;min-height:80px}
 
   <div class="content">
     <div class="pane active" id="p-hoy">
-      <!-- Banner PWA instalación -->
       <div class="pwa-banner" id="pwa-banner">
         <div style="font-size:24px">📲</div>
         <p><strong>Instalar FigAnzi</strong>Agrégala a tu pantalla de inicio para usarla como app</p>
@@ -357,7 +352,7 @@ textarea{resize:vertical;min-height:80px}
       <p id="confirm-msg">¿Estás seguro?</p>
       <div class="btn-row" style="display:flex;gap:10px;justify-content:center">
         <button class="btn-red" id="confirm-btn-si">Sí, eliminar</button>
-        <button class="btn-outline" onclick="document.getElementById('modal-confirmar').classList.remove('open')">Cancelar</button>
+        <button class="btn-outline" id="confirm-btn-no">Cancelar</button>
       </div>
     </div>
   </div>
@@ -426,7 +421,6 @@ let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  // Mostrar banner solo si no fue descartado antes
   if(!localStorage.getItem('pwa-dismissed')) {
     q('pwa-banner').classList.add('show');
   }
@@ -450,7 +444,6 @@ q('pwa-banner-close').addEventListener('click', () => {
   localStorage.setItem('pwa-dismissed', '1');
 });
 
-// Registrar Service Worker
 if('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
@@ -468,7 +461,16 @@ function mostrarConfirmacion(mensaje, callbackSi, textoSi = 'Sí') {
   };
   q('modal-confirmar').classList.add('open');
 }
-q('modal-confirmar').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
+
+// Cerrar modal al tocar fuera
+q('modal-confirmar').addEventListener('click', function(e){ 
+  if(e.target === this) this.classList.remove('open'); 
+});
+
+// Botón Cancelar del modal
+q('confirm-btn-no').addEventListener('click', function(){
+  q('modal-confirmar').classList.remove('open');
+});
 
 // ============ NAV ============
 window.go = function(p){
@@ -549,7 +551,7 @@ function miniCard(x){
   </div>`;
 }
 
-// ============ CAMBIAR ESTADO — CORREGIDO (fusiona con datos originales) ============
+// ============ CAMBIAR ESTADO ============
 window.cambiarEstado = async function(id, est){
   try {
     setSyncStatus('syncing');
@@ -708,7 +710,7 @@ function renderPerfil(k){
     <div style="display:flex;align-items:center;gap:14px">
       <div style="width:60px;height:60px;border-radius:50%;background:#e87060;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;font-family:'DM Serif Display',serif">${iniciales(c.nombre)}</div>
       <div style="flex:1"><div style="font-family:'DM Serif Display',serif;font-size:22px;color:#fff">${c.nombre}</div>${c.tel?`<div style="font-size:13px;color:rgba(255,255,255,.65)">📞 ${c.tel}</div>`:''}</div>
-      ${c.tel?`<a href="${waLink}" target="_blank" style="background:#25D366;color:#fff;border:none;padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;text-decoration:none;flex-shrink:0">💬 WhatsApp</a>`:''}
+      ${c.tel?`<a href="${waLink}" target="_blank" style="background:#25D366;color:#fff;padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;text-decoration:none;display:inline-block;flex-shrink:0">💬 WhatsApp</a>`:''}
     </div>
   </div>`;
 
@@ -721,7 +723,10 @@ function renderPerfil(k){
     </div>`;
   }
 
-  html += `<div class="sec-title">📋 Historial (${c.registros.length})</div>`;
+  html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div class="sec-title" style="margin:0">📋 Historial (${c.registros.length})</div>
+    <button class="btn-red" style="font-size:10px;padding:5px 10px" onclick="mostrarConfirmacion('¿Eliminar a ${c.nombre} y TODOS sus registros?', ()=>eliminarCliente('${k}'), 'Sí, eliminar todo')">🗑️ Eliminar cliente</button>
+  </div>`;
   sorted.forEach(x=>{
     const esCita = x.tipo==='cita';
     const extras = ['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'].filter(ek=>x['x_'+ek]);
@@ -756,6 +761,26 @@ function renderPerfil(k){
   q('vista-perfil').innerHTML = html;
 }
 window.volverClientes = function(){ perfilActivo=null; renderClientes(); }
+
+// ============ ELIMINAR CLIENTE COMPLETO ============
+window.eliminarCliente = async function(k){
+  const c = getClientes().find(x=>normNom(x.nombre)===k);
+  if(!c) return;
+  try {
+    setSyncStatus('syncing');
+    for(const reg of c.registros){
+      await supabase.from('registros').delete().eq('id', Number(reg.id));
+    }
+    await cargarDatos();
+    perfilActivo = null;
+    renderClientes();
+    renderHoy();
+    setSyncStatus('ok');
+  } catch(e) {
+    setSyncStatus('error');
+    alert('Error al eliminar: ' + e.message);
+  }
+}
 
 // ============ DEUDORES ============
 window.mostrarDeudores = function(){
@@ -868,7 +893,7 @@ window.abrirEditar = function(id){
   q('modal-editar').classList.add('open');
 }
 
-// ============ GUARDAR EDICIÓN — CORREGIDO (fusiona con datos originales) ============
+// ============ GUARDAR EDICIÓN ============
 window.guardarEdicion = async function(id, tipo){
   const esCita = tipo==='cita';
   const datos = {
@@ -903,7 +928,6 @@ window.guardarEdicion = async function(id, tipo){
     });
   }
   try {
-    // Fusionar con datos originales para no perder el campo 'tipo' ni otros
     const original = _cache.find(d => d.id === id);
     const { id: _id, ...datosOriginales } = original || {};
     await saveData(id, { ...datosOriginales, ...datos });
@@ -920,7 +944,7 @@ window.eliminarRegistro = async function(id){
     cerrarModal();
     renderHoy();
     if(perfilActivo) renderPerfil(perfilActivo);
-  } catch(e) { alert('Error al eliminar.'); }
+  } catch(e) { alert('Error al eliminar: ' + e.message); }
 }
 
 window.cerrarModal = function(){ q('modal-editar').classList.remove('open'); }
@@ -968,8 +992,7 @@ window.guardar = async function(){
     base.ab2 = q('f-ab2')?.value || null;
     base.formaPago = q('f-pago')?.value || '';
     base.nped = qv('f-nped');
-    const nombres = ['enchufe','lavaplatos','gas','horno micr.','agua','campana','piedra','copero','post','península'];
-    const claves =  ['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'];
+    const claves = ['enchufe','lavaplatos','gas','horno','agua','campana','piedra','copero','post','peninsula'];
     document.querySelectorAll('#extras-grid .extra-btn').forEach((btn,i)=>{
       base['x_'+claves[i]] = btn.classList.contains('sel');
     });
