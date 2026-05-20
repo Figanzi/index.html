@@ -720,7 +720,7 @@ function renderPerfil(k){
 
   html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
     <div class="sec-title" style="margin:0">📋 Historial (${c.registros.length})</div>
-    <button class="btn-red" style="font-size:10px;padding:5px 10px" onclick="if(confirm('¿Eliminar a este cliente y TODOS sus registros?')) eliminarCliente('${k}')">🗑️ Eliminar cliente</button>
+   <button class="btn-red" style="font-size:10px;padding:5px 10px;background:#c0392b;color:#fff" onclick="if(confirm('¿Eliminar a ${c.nombre} y TODOS sus registros?')) eliminarCliente('${k}')">🗑️ Eliminar cliente</button>
   </div>`;
   sorted.forEach(x=>{
     const esCita = x.tipo==='cita';
