@@ -2,7 +2,7 @@
   "name": "FigAnzi",
   "short_name": "FigAnzi",
   "description": "Gestión de citas y pedidos para muebles y mesones",
-  "start_url": "/",
+  "start_url": "index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f5f3ef",
