@@ -719,7 +719,7 @@ function renderPerfil(k){
 
   html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
     <div class="sec-title" style="margin:0">📋 Historial (${c.registros.length})</div>
-    <button class="btn-red" style="font-size:10px;padding:5px 10px" onclick="mostrarConfirmacion('¿Eliminar a ${c.nombre} y TODOS sus registros?', ()=>eliminarCliente('${k}'), 'Sí, eliminar todo')">🗑️ Eliminar cliente</button>
+    <button class="btn-red" style="font-size:10px;padding:5px 10px" onclick="if(confirm('¿Eliminar a este cliente y TODOS sus registros?')) eliminarCliente('${k}')">🗑️ Eliminar cliente</button>
   </div>`;
   sorted.forEach(x=>{
     const esCita = x.tipo==='cita';
@@ -881,7 +881,7 @@ window.abrirEditar = function(id){
   }
 
   html += `<div style="display:flex;gap:8px;margin-top:12px"><button class="btn-main" style="flex:1" onclick="guardarEdicion('${id}','${x.tipo}')">💾 Guardar</button><button class="btn-outline" onclick="cerrarModal()">Cancelar</button></div>
-  <div style="margin-top:10px"><button class="btn-red btn-eliminar-registro" data-id="${id}">🗑️ Eliminar registro</button></div>`;
+  <div style="margin-top:10px"><button class="btn-red" onclick="if(confirm('¿Eliminar este registro?')) eliminarRegistro('${id}')">🗑️ Eliminar registro</button></div>`;
 
   q('modal-body').innerHTML = html;
   q('modal-editar').classList.add('open');
