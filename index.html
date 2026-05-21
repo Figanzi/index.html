@@ -758,7 +758,7 @@ let html = `<div class="perfil-back" onclick="volverClientes()"><svg viewBox="0 
   </div>
  
 
-      <button class="btn-nuevo-pedido" data-k="${k}" style="margin-top:12px;width:100%;padding:10px;border-radius:8px;background:#e87060;color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer">📦 Agregar nuevo pedido</button>
+      
 
   if(totalFacturado>0){
     html += `<div class="card" style="margin-bottom:12px">
@@ -805,31 +805,10 @@ let html = `<div class="perfil-back" onclick="volverClientes()"><svg viewBox="0 
     </div></div>`;
   });
   q('vista-perfil').innerHTML = html;
-  // Event listener para el botón de nuevo pedido (evita problemas con template literals)
-  const btnNuevoPedido = q('vista-perfil').querySelector('.btn-nuevo-pedido');
-  if(btnNuevoPedido){
-    btnNuevoPedido.addEventListener('click', function(){
-      nuevoPedidoDesdeCliente(this.dataset.k);
-    });
-  }
-}
+
 window.volverClientes = function(){ perfilActivo=null; renderClientes(); }
 
-window.nuevoPedidoDesdeCliente = function(k){
-  const c = getClientes().find(x => normNom(x.nombre) === k);
-  if(!c) return;
-  
-  go('nuevo');
-  tipoActual = 'pedido';
-  document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('sel'));
-  document.querySelectorAll('.tipo-btn')[1].classList.add('sel');
-  q('bloque-cita').style.display = 'none';
-  q('bloque-pedido').style.display = 'block';
-  
-  q('f-nom').value = c.nombre;
-  q('f-tel').value = c.tel || '';
-  q('f-dir').value = c.dir || '';
-}
+
 
 // ============ ELIMINAR CLIENTE COMPLETO ============
 window.eliminarCliente = async function(k){
