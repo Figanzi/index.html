@@ -756,9 +756,7 @@ let html = `<div class="perfil-back" onclick="volverClientes()"><svg viewBox="0 
       ${c.tel?`<a href="${waLink}" target="_blank" style="background:#25D366;color:#fff;padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;text-decoration:none;display:inline-block;flex-shrink:0">💬 WhatsApp</a>`:''}
     </div>
   </div>
- 
-
-      
+`;
 
   if(totalFacturado>0){
     html += `<div class="card" style="margin-bottom:12px">
@@ -805,6 +803,7 @@ let html = `<div class="perfil-back" onclick="volverClientes()"><svg viewBox="0 
     </div></div>`;
   });
   q('vista-perfil').innerHTML = html;
+}
 
 window.volverClientes = function(){ perfilActivo=null; renderClientes(); }
 
