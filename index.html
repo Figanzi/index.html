@@ -755,8 +755,11 @@ let html = `<div class="perfil-back" onclick="volverClientes()"><svg viewBox="0 
       <div style="flex:1"><div style="font-family:'DM Serif Display',serif;font-size:22px;color:#fff">${c.nombre}</div>${c.tel?`<div style="font-size:13px;color:rgba(255,255,255,.65)">📞 ${c.tel}</div>`:''}</div>
       ${c.tel?`<a href="${waLink}" target="_blank" style="background:#25D366;color:#fff;padding:8px 12px;border-radius:20px;font-size:11px;font-weight:600;text-decoration:none;display:inline-block;flex-shrink:0">💬 WhatsApp</a>`:''}
     </div>
+    ${c.dir ? `<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:4px">📍 ${c.dir}</div>` : ''}
   </div>
 `;
+
+  html += `<button class="btn-main" style="margin-bottom:12px;background:#e87060" onclick="nuevoPedidoDesdeCliente('${k}')">📦 Nuevo pedido para ${c.nombre.split(' ')[0]}</button>`;
 
   if(totalFacturado>0){
     html += `<div class="card" style="margin-bottom:12px">
@@ -807,7 +810,19 @@ let html = `<div class="perfil-back" onclick="volverClientes()"><svg viewBox="0 
 
 window.volverClientes = function(){ perfilActivo=null; renderClientes(); }
 
-
+window.nuevoPedidoDesdeCliente = function(k){
+  const c = getClientes().find(x => normNom(x.nombre) === k);
+  if(!c) return;
+  go('nuevo');
+  tipoActual = 'pedido';
+  document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('sel'));
+  document.querySelectorAll('.tipo-btn')[1].classList.add('sel');
+  q('bloque-cita').style.display = 'none';
+  q('bloque-pedido').style.display = 'block';
+  q('f-nom').value = c.nombre || '';
+  q('f-tel').value = c.tel || '';
+  q('f-dir').value = c.dir || '';
+}
 
 // ============ ELIMINAR CLIENTE COMPLETO ============
 window.eliminarCliente = async function(k){
