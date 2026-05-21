@@ -528,8 +528,12 @@ function renderHoy(){
   const data = getData(), h = hoy();
   const citas = data.filter(x=>x.tipo==='cita'&&x.fecha===h&&x.estado!=='cancelado');
   const entregas = data.filter(x=>x.tipo==='pedido'&&x.fentrega===h&&x.estado==='pendiente');
-  const mesActual = mesStr(new Date());
+  const añoActual = new Date().getFullYear();
   const delMes = data.filter(x=>x.tipo==='pedido'&&(x.fventa||'').startsWith(mesActual)&&x.estado!=='cancelado');
+  const delAño = data.filter(x=>x.tipo==='pedido'&&(x.fventa||'').startsWith(String(añoActual))&&x.estado!=='cancelado');
+const genAño = delAño.reduce((a,x)=>a+(Number(x.total)||0),0);
+const cobradoAño = delAño.reduce((a,x)=>a+(Number(x.ab1)||0)+(Number(x.ab2)||0),0);
+const pendienteAño = data.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado'&&x.estado!=='entregado'&&saldo(x)>0).reduce((a,x)=>a+saldo(x),0);
   const genMes = delMes.reduce((a,x)=>a+(Number(x.total)||0),0);
   const cobrado = delMes.reduce((a,x)=>a+(Number(x.ab1)||0)+(Number(x.ab2)||0),0);
   const porCobrar = data.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado'&&x.estado!=='entregado'&&saldo(x)>0).reduce((a,x)=>a+saldo(x),0);
@@ -539,10 +543,10 @@ function renderHoy(){
   q('s-mes').textContent = '$'+Math.round(genMes).toLocaleString('es-CL');
   q('s-cobrar').textContent = '$'+Math.round(porCobrar).toLocaleString('es-CL');
   
-  q('mes-actual-dash').textContent = new Date().toLocaleDateString('es-CL',{month:'long',year:'numeric'});
-  q('dash-facturado').textContent = '$'+Math.round(genMes).toLocaleString('es-CL');
-  q('dash-cobrado').textContent = '$'+Math.round(cobrado).toLocaleString('es-CL');
-  q('dash-pendiente').textContent = '$'+Math.round(porCobrar).toLocaleString('es-CL');
+  q('mes-actual-dash').textContent = 'Año ' + añoActual;
+  q('dash-facturado').textContent = '$'+Math.round(genAño).toLocaleString('es-CL');
+  q('dash-cobrado').textContent = '$'+Math.round(cobradoAño).toLocaleString('es-CL');
+  q('dash-pendiente').textContent = '$'+Math.round(pendienteAño).toLocaleString('es-CL');
 
   const deHoy = [...citas,...entregas].sort((a,b)=>((a.hora||a.hentrega||'')>(b.hora||b.hentrega||''))?1:-1);
   q('lista-hoy').innerHTML = deHoy.length===0 ? '<div class="empty"><div class="empty-icon">🌙</div><p>Sin actividad para hoy</p></div>' : deHoy.map(miniCard).join('');
