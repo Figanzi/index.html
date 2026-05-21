@@ -224,7 +224,7 @@ textarea{resize:vertical;min-height:80px}
       
       <div class="card" style="margin-bottom:12px;background:var(--text);color:#fff;border:none">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.5px">📊 Finanzas del mes</span>
+          <span style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.5px">📊 Finanzas del año</span>
           <span style="font-size:10px;opacity:.7" id="mes-actual-dash"></span>
         </div>
         <div style="display:flex;align-items:flex-end;gap:8px">
@@ -528,14 +528,21 @@ function renderHoy(){
   const data = getData(), h = hoy();
   const citas = data.filter(x=>x.tipo==='cita'&&x.fecha===h&&x.estado!=='cancelado');
   const entregas = data.filter(x=>x.tipo==='pedido'&&x.fentrega===h&&x.estado==='pendiente');
+  const mesActual = mesStr(new Date());
   const añoActual = new Date().getFullYear();
+  
+  // Mensual (Generado mes)
   const delMes = data.filter(x=>x.tipo==='pedido'&&(x.fventa||'').startsWith(mesActual)&&x.estado!=='cancelado');
-  const delAño = data.filter(x=>x.tipo==='pedido'&&(x.fventa||'').startsWith(String(añoActual))&&x.estado!=='cancelado');
-const genAño = delAño.reduce((a,x)=>a+(Number(x.total)||0),0);
-const cobradoAño = delAño.reduce((a,x)=>a+(Number(x.ab1)||0)+(Number(x.ab2)||0),0);
-const pendienteAño = data.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado'&&x.estado!=='entregado'&&saldo(x)>0).reduce((a,x)=>a+saldo(x),0);
   const genMes = delMes.reduce((a,x)=>a+(Number(x.total)||0),0);
-  const cobrado = delMes.reduce((a,x)=>a+(Number(x.ab1)||0)+(Number(x.ab2)||0),0);
+  const cobradoMes = delMes.reduce((a,x)=>a+(Number(x.ab1)||0)+(Number(x.ab2)||0),0);
+  
+  // Anual (Dashboard)
+  const delAño = data.filter(x=>x.tipo==='pedido'&&(x.fventa||'').startsWith(String(añoActual))&&x.estado!=='cancelado');
+  const genAño = delAño.reduce((a,x)=>a+(Number(x.total)||0),0);
+  const cobradoAño = delAño.reduce((a,x)=>a+(Number(x.ab1)||0)+(Number(x.ab2)||0),0);
+  const pendienteAño = data.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado'&&x.estado!=='entregado'&&saldo(x)>0).reduce((a,x)=>a+saldo(x),0);
+  
+  // Por cobrar (stats)
   const porCobrar = data.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado'&&x.estado!=='entregado'&&saldo(x)>0).reduce((a,x)=>a+saldo(x),0);
 
   q('s-citas').textContent = citas.length;
