@@ -275,10 +275,12 @@ textarea{resize:vertical;min-height:80px}
             <option value="cancelado">Cancelado</option>
           </select>
         </div>
-        <div class="filter-row">
+        <div class="filter-row" style="flex-wrap:wrap;gap:4px">
           <button class="filt active" onclick="filtCl('todos',this)">Todos</button>
-          <button class="filt" onclick="filtCl('debe',this)">Con saldo</button>
-          <button class="filt" onclick="filtCl('pagado',this)">Pagados</button>
+          <button class="filt" onclick="filtCl('citas',this)">📅 Citas</button>
+          <button class="filt" onclick="filtCl('pedidos',this)">📦 Pedidos</button>
+          <button class="filt" onclick="filtCl('debe',this)">💰 Con saldo</button>
+          <button class="filt" onclick="filtCl('pagado',this)">✅ Pagados</button>
         </div>
         <div id="lista-clientes"></div>
       </div>
@@ -715,8 +717,12 @@ function renderClientes(){
     }));
   }
   
+  // NUEVOS FILTROS
+  if(filtroClientes==='citas') clientes = clientes.filter(c=>c.registros.some(x=>x.tipo==='cita'));
+  if(filtroClientes==='pedidos') clientes = clientes.filter(c=>c.registros.some(x=>x.tipo==='pedido'));
   if(filtroClientes==='debe') clientes = clientes.filter(c=>c.registros.some(x=>x.tipo==='pedido'&&saldo(x)>0&&x.estado!=='cancelado'&&x.estado!=='entregado'));
   if(filtroClientes==='pagado') clientes = clientes.filter(c=>c.registros.some(x=>x.tipo==='pedido'&&saldo(x)<=0&&x.estado!=='cancelado'));
+  
   clientes.sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
 
   if(!clientes.length){ q('lista-clientes').innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><p>Sin resultados</p></div>'; return; }
