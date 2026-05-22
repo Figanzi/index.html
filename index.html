@@ -232,12 +232,10 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 
       <div id="aviso-hoy" class="aviso" style="display:none"><strong>☀️ Buenos días</strong><p id="aviso-txt"></p></div>
 
-      <div class="stats-grid">
-        <div class="stat-card"><div class="stat-label">Citas hoy</div><div class="stat-num" id="s-citas">0</div></div>
-        <div class="stat-card"><div class="stat-label">Entregas hoy</div><div class="stat-num" id="s-ent">0</div></div>
-        <div class="stat-card"><div class="stat-label">Generado mes</div><div class="stat-num green" id="s-mes">$0</div></div>
-        <div class="stat-card" style="cursor:pointer" onclick="mostrarDeudores()"><div class="stat-label">Por cobrar</div><div class="stat-num" style="color:#c0392b!important" id="s-cobrar">$0</div></div>
-      </div>
+      <div class="stats-grid" style="grid-template-columns:1fr 1fr">
+  <div class="stat-card"><div class="stat-label">Citas hoy</div><div class="stat-num" id="s-citas">0</div></div>
+  <div class="stat-card"><div class="stat-label">Entregas hoy</div><div class="stat-num" id="s-ent">0</div></div>
+</div>
       <div class="sec-title">Agenda de hoy</div>
       <div id="lista-hoy"></div>
       <div class="sec-title">Próximos (7 días)</div>
