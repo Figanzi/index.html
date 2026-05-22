@@ -222,6 +222,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
   </div>
 
   <div class="content">
+    <!-- PESTAÑA HOY -->
     <div class="pane active" id="p-hoy">
       <div class="pwa-banner" id="pwa-banner">
         <div style="font-size:24px">📲</div>
@@ -233,15 +234,16 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
       <div id="aviso-hoy" class="aviso" style="display:none"><strong>☀️ Buenos días</strong><p id="aviso-txt"></p></div>
 
       <div class="stats-grid" style="grid-template-columns:1fr 1fr">
-  <div class="stat-card"><div class="stat-label">Citas hoy</div><div class="stat-num" id="s-citas">0</div></div>
-  <div class="stat-card"><div class="stat-label">Entregas hoy</div><div class="stat-num" id="s-ent">0</div></div>
-</div>
+        <div class="stat-card"><div class="stat-label">Citas hoy</div><div class="stat-num" id="s-citas">0</div></div>
+        <div class="stat-card"><div class="stat-label">Entregas hoy</div><div class="stat-num" id="s-ent">0</div></div>
+      </div>
       <div class="sec-title">Agenda de hoy</div>
       <div id="lista-hoy"></div>
       <div class="sec-title">Próximos (7 días)</div>
       <div id="lista-prox"></div>
     </div>
 
+    <!-- PESTAÑA CALENDARIO -->
     <div class="pane" id="p-cal">
       <div class="cal-header"><h2 id="cal-titulo"></h2><div class="cal-nav"><button onclick="calNav(-1)">‹</button><button onclick="calNav(1)">›</button></div></div>
       <div class="cal-grid" id="cal-grid"></div>
@@ -249,6 +251,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
       <div id="cal-events"></div>
     </div>
 
+    <!-- PESTAÑA CLIENTES -->
     <div class="pane" id="p-clientes">
       <div id="vista-lista-clientes">
         <input type="search" id="busca-cliente" placeholder="Buscar por nombre, material..." style="margin-bottom:8px" oninput="renderClientes()">
@@ -274,8 +277,9 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
       <div id="vista-perfil" style="display:none"></div>
     </div>
 
+    <!-- PESTAÑA FINANZAS -->
     <div class="pane" id="p-finanzas">
-      <div class="card" style="margin-bottom:12px;background:var(--text);color:#fff;border:none">
+      <div class="card" style="margin-bottom:12px;background:linear-gradient(135deg, #1a1714, #2d2a27);color:#fff;border:none">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <span style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.5px">📊 Finanzas del año</span>
           <span style="font-size:10px;opacity:.7" id="fin-mes-actual-dash"></span>
@@ -305,6 +309,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
       <div id="fin-lista-deudores"></div>
     </div>
 
+    <!-- PESTAÑA NUEVO -->
     <div class="pane" id="p-nuevo">
       <div class="tipo-sel">
         <button class="tipo-btn sel" onclick="selTipo('cita',this)">📅 Cita</button>
@@ -560,13 +565,10 @@ function renderHoy(){
   const genAño = delAño.reduce((a,x)=>a+(Number(x.total)||0),0);
   const cobradoAño = delAño.reduce((a,x)=>a+(Number(x.ab1)||0)+(Number(x.ab2)||0),0);
   const pendienteAño = data.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado'&&x.estado!=='entregado'&&saldo(x)>0).reduce((a,x)=>a+saldo(x),0);
-  
   const porCobrar = data.filter(x=>x.tipo==='pedido'&&x.estado!=='cancelado'&&x.estado!=='entregado'&&saldo(x)>0).reduce((a,x)=>a+saldo(x),0);
 
   q('s-citas').textContent = citas.length;
   q('s-ent').textContent = entregas.length;
-  q('s-mes').textContent = '$'+Math.round(genMes).toLocaleString('es-CL');
-  q('s-cobrar').textContent = '$'+Math.round(porCobrar).toLocaleString('es-CL');
 
   const deHoy = [...citas,...entregas].sort((a,b)=>((a.hora||a.hentrega||'')>(b.hora||b.hentrega||''))?1:-1);
   q('lista-hoy').innerHTML = deHoy.length===0 ? '<div class="empty"><div class="empty-icon">🌙</div><p>Sin actividad para hoy</p></div>' : deHoy.map(miniCard).join('');
@@ -580,7 +582,7 @@ function renderHoy(){
   }).sort((a,b)=>(a.tipo==='cita'?a.fecha:a.fentrega)>(b.tipo==='cita'?b.fecha:b.fentrega)?1:-1);
   q('lista-prox').innerHTML = prox.length===0 ? '<div class="empty" style="padding:20px"><p>Sin eventos próximos</p></div>' : prox.map(miniCard).join('');
 
-  // Actualizar pestaña Finanzas (si existe)
+  // Actualizar pestaña Finanzas
   if(q('fin-mes-actual-dash')){
     q('fin-mes-actual-dash').textContent = 'Año ' + añoActual;
     q('fin-dash-facturado').textContent = '$'+Math.round(genAño).toLocaleString('es-CL');
@@ -592,9 +594,8 @@ function renderHoy(){
 }
 
 function renderFinanzas(){
-  renderHoy(); // Actualiza los datos primero
+  renderHoy();
   
-  // Lista de deudores en la pestaña finanzas
   const data = getData();
   const deudores = {};
   data.forEach(x => {
