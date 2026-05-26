@@ -1,3 +1,6 @@
+Aquí tienes el código completo y funcional de FigAnzi, con todas las correcciones de finanzas y la sección de Gastos Mensuales lista para usar.
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -305,6 +308,20 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
         <div class="stat-card" style="cursor:pointer" onclick="mostrarDeudores()"><div class="stat-label">Por cobrar</div><div class="stat-num" style="color:#c0392b!important" id="fin-s-cobrar">$0</div></div>
       </div>
 
+      <!-- GASTOS MENSUALES (Manual) -->
+      <div class="card" style="margin-top:12px;background:var(--rojo-light);border-color:var(--rojo-mid)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-weight:700;color:var(--rojo);font-size:14px">🧾 Total Gastos del Mes</span>
+          <span style="font-size:11px;color:var(--rojo)" id="gasto-mes-label"></span>
+        </div>
+        <div style="font-size:28px;font-weight:700;color:var(--rojo);margin-bottom:12px" id="gasto-mes-valor">$0</div>
+        <div class="form-section" style="margin-bottom:8px">
+          <label style="color:var(--rojo);font-size:10px">Nuevo monto total (reemplaza el anterior)</label>
+          <input type="number" id="gasto-monto-input" placeholder="Ej: 1200000" style="border-color:var(--rojo-mid)">
+        </div>
+        <button class="btn-red" onclick="actualizarGastoMes()" style="width:100%">🔄 Actualizar Gasto</button>
+      </div>
+
       <div class="sec-title">📋 Clientes con saldo pendiente</div>
       <div id="fin-lista-deudores"></div>
     </div>
@@ -455,6 +472,41 @@ async function saveData(docId, datos) {
   await cargarDatos();
   setSyncStatus('ok');
   return docId;
+}
+
+// ============ GASTOS MENSUALES ============
+async function cargarGastoMes() {
+  const { data, error } = await supabase
+    .from('totales')
+    .select('*')
+    .eq('id', 'gastos_mes')
+    .single();
+  
+  if (!error && data && q('gasto-mes-valor')) {
+    q('gasto-mes-valor').textContent = '$' + Math.round(Number(data.valor) || 0).toLocaleString('es-CL');
+    const fecha = data.actualizado ? new Date(data.actualizado) : new Date();
+    if(q('gasto-mes-label')) q('gasto-mes-label').textContent = 'Actualizado: ' + fecha.toLocaleDateString('es-CL', {month:'short', day:'numeric'});
+    if(q('gasto-monto-input')) q('gasto-monto-input').value = '';
+  }
+}
+
+window.actualizarGastoMes = async function() {
+  const monto = Number(q('gasto-monto-input')?.value) || 0;
+  if (monto <= 0) { alert('Ingresa un monto válido'); return; }
+  
+  setSyncStatus('syncing');
+  const { error } = await supabase
+    .from('totales')
+    .update({ valor: monto, actualizado: new Date().toISOString() })
+    .eq('id', 'gastos_mes');
+  
+  if (!error) {
+    await cargarGastoMes();
+    setSyncStatus('ok');
+  } else {
+    setSyncStatus('error');
+    alert('Error al actualizar');
+  }
 }
 
 function hoy(){ return new Date().toISOString().split('T')[0]; }
@@ -618,6 +670,8 @@ function renderFinanzas(){
     });
     q('fin-lista-deudores').innerHTML = html;
   }
+  
+  cargarGastoMes();
 }
 
 function miniCard(x){
@@ -1145,6 +1199,7 @@ async function iniciar(){
   try {
     if(txt) txt.textContent = 'Conectando...';
     await cargarDatos();
+    await cargarGastoMes();
     if(overlay) overlay.classList.add('hidden');
     setSyncStatus('ok');
     renderHoy();
@@ -1166,3 +1221,4 @@ iniciar();
 </script>
 </body>
 </html>
+
